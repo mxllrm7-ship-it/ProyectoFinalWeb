@@ -1,0 +1,17 @@
+:root{
+    --c1:#096D4B;
+    --c2:#095A6B;
+    --c3:#D3A373;
+    --c4:#FDFDFF;
+    --c5:#2E3142;
+}
+*{
+     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
