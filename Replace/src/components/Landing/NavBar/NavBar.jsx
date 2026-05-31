@@ -1,5 +1,6 @@
 import "./NavBar.css";
 import "../../../styles/styles.css";
+import SearchBar from "./SearchBar";
 
 export default function NavBar() {
   return (
@@ -36,7 +37,7 @@ export default function NavBar() {
         </div>
       </div>
       <div className="f2">
-        
+        <SearchBar />
       </div>
     </nav>
   );
