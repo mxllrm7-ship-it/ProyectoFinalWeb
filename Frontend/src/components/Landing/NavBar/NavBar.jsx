@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router';
 import SearchBar from './SearchBar';
 import "./NavBar.css";
 import "../../../styles/styles.css";
@@ -35,8 +36,13 @@ export default function NavBar() {
         </ul>
 
         <div className="navbar-buttons">
-          <button type="button" className="navbar-btn-login">Ingresar</button>
-          <button type="button" className="navbar-btn-register">Registrarse</button>
+          <Link to="/login" className="navbar-btn-login">
+            Ingresar
+          </Link>
+
+          <Link to="/signup" className="navbar-btn-register">
+            Registrarse
+          </Link>
         </div>
       </div>
 

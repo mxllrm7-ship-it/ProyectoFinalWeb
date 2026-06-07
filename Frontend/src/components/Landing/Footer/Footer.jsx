@@ -1,10 +1,18 @@
-import { Globe,  Camera,   ArrowRight } from 'lucide-react'
+import { Globe, Camera, ArrowRight, Music } from 'lucide-react'
 import './Footer.css'
-
+import '../../../styles/styles.css'
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-content">
+        <div className="footer-branding">
+          <div className="brand-icon">
+            <Music size={32} />
+          </div>
+          <h2 className="brand-name">Nodus</h2>
+          <p className="brand-description">La plataforma líder para descubrir, organizar y vivir experiencias inolvidables.</p>
+        </div>
+
         <div className="footer-section">
           <h3 className="footer-title">Comprar Entradas</h3>
           <ul className="footer-links">
@@ -12,16 +20,6 @@ export default function Footer() {
             <li><a href="#deportes">Eventos Deportivos</a></li>
             <li><a href="#festivales">Festivales</a></li>
             <li><a href="#teatro">Teatro y Shows</a></li>
-          </ul>
-        </div>
-
-        <div className="footer-section">
-          <h3 className="footer-title">Artistas</h3>
-          <ul className="footer-links">
-            <li><a href="#artistas-pop">Pop</a></li>
-            <li><a href="#artistas-rock">Rock</a></li>
-            <li><a href="#artistas-reggaeton">Reggaeton</a></li>
-            <li><a href="#artistas-latin">Música Latina</a></li>
           </ul>
         </div>
 
@@ -70,7 +68,7 @@ export default function Footer() {
             <Camera size={20} />
           </a>
         </div>
-        <p className="footer-copyright">© 2026 EventTickets. Todos los derechos reservados.</p>
+        <p className="footer-copyright">© 2026 Nodus. Todos los derechos reservados.</p>
       </div>
     </footer>
   )
