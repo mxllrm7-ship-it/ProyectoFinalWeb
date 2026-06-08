@@ -27,12 +27,13 @@ export default function NavBar() {
         </button>
 
         <ul className={`navbar-links ${sidebarOpen ? 'active' : ''}`}>
-          <li><a href="" onClick={closeSidebar}>Conciertos y Festivales</a></li>
-          <li><a href="" onClick={closeSidebar}>Teatro y Cultura</a></li>
-          <li><a href="" onClick={closeSidebar}>Deportes</a></li>
-          <li><a href="" onClick={closeSidebar}>Familiares</a></li>
-          <li><a href="" onClick={closeSidebar}>Especiales</a></li>
-          <li><a href="" onClick={closeSidebar}>Ciudades</a></li>
+          <li><Link to="/eventos" onClick={closeSidebar}>Conciertos y Festivales</Link></li>
+          <li><Link to="/eventos" onClick={closeSidebar}>Teatro y Cultura</Link></li>
+          <li><Link to="/eventos" onClick={closeSidebar}>Deportes</Link></li>
+          
+          <li><Link to="/eventos" onClick={closeSidebar}>Especiales</Link></li>
+          <li><Link to="/eventos" onClick={closeSidebar}>Ciudades</Link></li>
+          <li><Link to="/mis-eventos" onClick={closeSidebar}>Mis Tickets</Link></li>
         </ul>
 
         <div className="navbar-buttons">

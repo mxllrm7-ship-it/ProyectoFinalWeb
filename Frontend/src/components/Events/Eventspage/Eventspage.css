@@ -1,0 +1,115 @@
+/* EventsPage.css */
+.events-page {
+  min-height: 100vh;
+  background-color: #1a1d2e;
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Hero */
+.events-hero {
+  position: relative;
+  padding: 70px 40px 50px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--c2) 0%, var(--c5) 60%, #0d0f1a 100%);
+}
+
+.events-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(9, 109, 75, 0.2) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.events-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.events-hero-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.events-hero-title {
+  color: var(--c4);
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.events-hero-desc {
+  color: rgba(253, 253, 255, 0.65);
+  font-size: 15px;
+  font-weight: 500;
+  max-width: 500px;
+}
+
+/* Results bar */
+.events-results-bar {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 40px 10px;
+}
+
+.events-results-count {
+  color: var(--c3);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Grid */
+.events-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 40px 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* Empty */
+.events-empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: rgba(253, 253, 255, 0.4);
+  font-size: 16px;
+}
+
+.events-empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .events-hero {
+    padding: 50px 20px 36px;
+  }
+
+  .events-results-bar {
+    padding: 16px 20px 8px;
+  }
+
+  .events-grid {
+    padding: 16px 20px 48px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.events-hero-icon,
+.events-empty-icon {
+  width: 48px;
+  height: 48px;
+}
