@@ -29,3 +29,14 @@ export class LoginPayload {
     this.password = password
   }
 }
+
+export class EditarPerfilPayload {
+  constructor({ id_usuario, nombre_usuario, email_usuario, telefono, username, foto_rostro }) {
+    this.id_usuario = id_usuario
+    this.nombre_usuario = nombre_usuario
+    this.email_usuario = email_usuario
+    this.telefono = telefono
+    this.username = username
+    this.foto_rostro = foto_rostro ?? null
+  }
+}

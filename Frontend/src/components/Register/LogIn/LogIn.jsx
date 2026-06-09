@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
 import './LogIn.css';
-import '../../../styles/styles.css'
-import { Link } from 'react-router';
+import '../../../styles/styles.css';
+import { Link, useNavigate } from 'react-router';
 import { loginUsuario } from '../../../services/usuarioService';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function LogInUser() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       const usuario = await loginUsuario({ username, password });
-      localStorage.setItem('usuario', JSON.stringify(usuario));
-      window.location.href = '/';
+      login(usuario);
+      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,7 +45,6 @@ export default function LogInUser() {
               required
             />
           </div>
-
           <div className="login-form-group">
             <label htmlFor="password" className="login-label">Contraseña</label>
             <input
@@ -56,14 +57,11 @@ export default function LogInUser() {
               required
             />
           </div>
-
           {error && <span className="login-error-message">{error}</span>}
-
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
-
         <div className="login-footer">
           <p className="login-text">¿No tienes cuenta? <Link to="/signup" className="login-link">Registrarse</Link></p>
         </div>

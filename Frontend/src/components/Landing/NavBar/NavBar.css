@@ -1,44 +1,26 @@
 .navbar {
-  width: 100%;
   background-color: var(--c2);
-  font-family: "Montserrat", sans-serif;
+  padding: 16px 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .navbar-header {
-  width: 100%;
-  height: 80px;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 40px;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.navbar-search-row {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--c2);
-  padding: 0 40px 20px;
-  box-sizing: border-box;
-}
-
-.navbar-search-row .search-bar-container {
-  background-color: transparent;
-  padding: 0;
-  width: 100%;
-  max-width: 1400px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .navbar-logo {
-  width: 100px;
-  height: 100px;
+  height: 40px;
+  width: auto;
   object-fit: contain;
 }
 
@@ -48,13 +30,13 @@
   background: none;
   border: none;
   cursor: pointer;
+  padding: 8px;
   gap: 6px;
-  z-index: 1001;
 }
 
 .hamburger-line {
   width: 24px;
-  height: 3px;
+  height: 2px;
   background-color: var(--c4);
   transition: all 0.3s ease;
   border-radius: 2px;
@@ -74,151 +56,224 @@
 
 .navbar-links {
   display: flex;
-  flex-direction: row;
   list-style: none;
-  gap: 24px;
   margin: 0;
   padding: 0;
+  gap: 8px;
+  flex: 1;
 }
 
 .navbar-links li a {
-  text-decoration: none;
   color: var(--c4);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
   font-weight: 500;
-  transition: color 0.3s ease;
+  white-space: nowrap;
+}
+
+.navbar-links li a svg {
+  color: var(--c4);
+  flex-shrink: 0;
 }
 
 .navbar-links li a:hover {
-  color: var(--c3);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--c4);
+}
+
+.navbar-links li a:hover svg {
+  color: var(--c4);
 }
 
 .navbar-buttons {
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 12px;
+  align-items: center;
+}
+
+.navbar-user {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.navbar-username {
+  color: var(--c4);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.navbar-username svg {
+  color: var(--c4);
+  flex-shrink: 0;
+}
+
+.navbar-username:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .navbar-btn-login,
 .navbar-btn-register {
-  border: none;
-  padding: 10px 20px;
-  font-family: "Montserrat", sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  border-radius: 4px;
-  background-color: var(--c1);
   color: var(--c4);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+}
+
+.navbar-btn-login svg,
+.navbar-btn-register svg {
+  color: var(--c4);
+  flex-shrink: 0;
 }
 
 .navbar-btn-login:hover,
 .navbar-btn-register:hover {
-  background-color: var(--c3);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 1024px) {
-  .navbar-header {
-    padding: 16px 20px;
-  }
+.navbar-btn-register {
+  background-color: var(--c3);
+  color: var(--c5);
+  border: none;
+}
 
-  .navbar-search-row {
-    padding: 0 20px 20px;
-  }
+.navbar-btn-register svg {
+  color: var(--c5);
+}
 
-  .navbar-links {
-    gap: 16px;
-  }
+.navbar-btn-register:hover {
+  background-color: rgba(211, 163, 115, 0.9);
+}
 
-  .navbar-links li a {
-    font-size: 13px;
-  }
-
-  .navbar-btn-login,
-  .navbar-btn-register {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
+.navbar-search-container {
+  width: 100%;
 }
 
 @media (max-width: 768px) {
-  .navbar-header {
-    padding: 0 16px;
-    height: 60px;
-  }
-
-  .navbar-search-row {
-    padding: 16px;
-  }
-
   .hamburger {
     display: flex;
   }
 
-  .navbar-logo {
-    width: 60px;
-    height: 60px;
+  .navbar {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .navbar-header {
+    flex-wrap: nowrap;
+    gap: 12px;
   }
 
   .navbar-links {
-    position: fixed;
-    left: 0;
+    position: absolute;
     top: 60px;
+    left: 0;
+    right: 0;
     flex-direction: column;
-    width: 100%;
-    height: calc(100vh - 60px);
-    background-color: var(--c2);
-    padding: 20px 16px;
+    background-color: var(--c1);
+    padding: 16px;
     gap: 0;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .navbar-links.active {
-    transform: translateX(0);
-  }
-
-  .navbar-links li {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 16px 0;
+    max-height: 500px;
   }
 
   .navbar-links li a {
+    padding: 12px 16px;
     font-size: 16px;
-    font-weight: 500;
   }
 
   .navbar-buttons {
-    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .navbar-user {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .navbar-username,
+  .navbar-btn-login,
+  .navbar-btn-register {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .navbar-search-container {
+    width: 100%;
+  }
+
+  .navbar-logo {
+    height: 36px;
   }
 }
 
 @media (max-width: 480px) {
-  .navbar-header {
-    padding: 0 12px;
-    height: 56px;
+  .navbar {
+    padding: 8px 12px;
+    gap: 8px;
   }
 
-  .hamburger-line {
-    width: 20px;
-    height: 2.5px;
+  .navbar-header {
+    gap: 8px;
   }
 
   .navbar-logo {
-    width: 50px;
-    height: 50px;
+    height: 32px;
   }
 
-  .navbar-links {
-    top: 56px;
-    height: calc(100vh - 56px);
+  .navbar-links li a {
+    padding: 10px 12px;
+    font-size: 14px;
   }
 
-  .navbar-search-row {
-    padding: 12px;
+  .navbar-btn-login,
+  .navbar-btn-register {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .navbar-links li a span,
+  .navbar-username span,
+  .navbar-btn-login span,
+  .navbar-btn-register span {
+    display: none;
+  }
+
+  .navbar-links li a svg,
+  .navbar-username svg,
+  .navbar-btn-login svg,
+  .navbar-btn-register svg {
+    margin: 0;
   }
 }
