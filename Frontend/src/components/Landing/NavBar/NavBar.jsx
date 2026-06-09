@@ -27,6 +27,7 @@ export default function NavBar() {
         </button>
 
         <ul className={`navbar-links ${sidebarOpen ? 'active' : ''}`}>
+          <li><Link to="/" onClick={closeSidebar}>Inicio</Link></li>
           <li><Link to="/eventos" onClick={closeSidebar}>Conciertos y Festivales</Link></li>
           <li><Link to="/eventos" onClick={closeSidebar}>Teatro y Cultura</Link></li>
           <li><Link to="/eventos" onClick={closeSidebar}>Deportes</Link></li>

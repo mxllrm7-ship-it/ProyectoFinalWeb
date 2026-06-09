@@ -1,14 +1,29 @@
 import React, { useState } from 'react';
 import './LogIn.css';
 import '../../../styles/styles.css'
+import { Link } from 'react-router';
+import { loginUsuario } from '../../../services/usuarioService';
 
 export default function LogInUser() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('LogIn:', { username, password });
+    setError('');
+    setLoading(true);
+
+    try {
+      const usuario = await loginUsuario({ username, password });
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      window.location.href = '/';
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,11 +57,15 @@ export default function LogInUser() {
             />
           </div>
 
-          <button type="submit" className="login-button">Ingresar</button>
+          {error && <span className="login-error-message">{error}</span>}
+
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? 'Ingresando...' : 'Ingresar'}
+          </button>
         </form>
 
         <div className="login-footer">
-          <p className="login-text">¿No tienes cuenta? <a href="#signup" className="login-link">Registrarse</a></p>
+          <p className="login-text">¿No tienes cuenta? <Link to="/signup" className="login-link">Registrarse</Link></p>
         </div>
       </div>
     </div>

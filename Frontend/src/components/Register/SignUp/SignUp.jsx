@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './SignUp.css';
 import '../../../styles/styles.css'
+import { registrarUsuario } from '../../../services/usuarioService';
 
 export default function SignUpUser() {
   const [nombre_usuario, setNombre_usuario] = useState('');
@@ -10,6 +11,8 @@ export default function SignUpUser() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;
@@ -31,19 +34,25 @@ export default function SignUpUser() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (password !== confirmPassword) {
       setPasswordError('Las contraseñas no coinciden');
       return;
     }
-    console.log('SignUp:', {
-      nombre_usuario,
-      email_usuario,
-      telefono,
-      username,
-      password
-    });
+
+    setLoading(true);
+    try {
+      const usuario = await registrarUsuario({ nombre_usuario, email_usuario, telefono, username, password, foto_rostro: null });
+      console.log('Usuario registrado:', usuario);
+      window.location.href = '/login';
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -130,11 +139,15 @@ export default function SignUpUser() {
             {passwordError && <span className="signup-error-message">{passwordError}</span>}
           </div>
 
-          <button type="submit" className="signup-button">Registrarse</button>
+          {error && <span className="signup-error-message">{error}</span>}
+
+          <button type="submit" className="signup-button" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrarse'}
+          </button>
         </form>
 
         <div className="signup-footer">
-          <p className="signup-text">¿Ya tienes cuenta? <a href="#login" className="signup-link">Iniciar Sesión</a></p>
+          <p className="signup-text">¿Ya tienes cuenta? <a href="/login" className="signup-link">Iniciar Sesión</a></p>
         </div>
       </div>
     </div>
