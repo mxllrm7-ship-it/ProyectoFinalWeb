@@ -8,6 +8,7 @@ import { useAuth } from '../../../context/AuthContext';
 
 export default function NavBar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(true);
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -20,37 +21,36 @@ export default function NavBar() {
     navigate('/');
   };
 
+  const toggleSearch = () => {
+    setSearchVisible(!searchVisible);
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-header">
         <img src="/LogoNodus.webp" alt="Logo" className="navbar-logo" />
-        <button className="hamburger" onClick={toggleSidebar}>
-          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
-        </button>
-        <ul className={`navbar-links ${sidebarOpen ? 'active' : ''}`}>
+        <ul className="navbar-links">
           <li>
-            <Link to="/" onClick={closeSidebar}>
-              <House size={15} />
+            <Link to="/">
+              <House size={16} />
               <span>Inicio</span>
             </Link>
           </li>
           <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <Music size={15} />
+            <Link to="/eventos">
+              <Music size={16} />
               <span>Conciertos y Festivales</span>
             </Link>
           </li>
           <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <Drama size={15} />
+            <Link to="/eventos">
+              <Drama size={16} />
               <span>Teatro y Cultura</span>
             </Link>
           </li>
           <li>
-            <Link to="/mis-eventos" onClick={closeSidebar}>
-              <Ticket size={15} />
+            <Link to="/mis-eventos">
+              <Ticket size={16} />
               <span>Mis Tickets</span>
             </Link>
           </li>
@@ -59,30 +59,89 @@ export default function NavBar() {
           {usuario ? (
             <div className="navbar-user">
               <Link to="/profile" className="navbar-username">
-                <User size={15} />
+                <User size={16} />
                 <span>Hola, {usuario.nombre_usuario}</span>
               </Link>
               <button className="navbar-btn-login" onClick={handleLogout}>
-                <LogOut size={15} />
+                <LogOut size={16} />
                 <span>Cerrar Sesión</span>
               </button>
             </div>
           ) : (
             <>
               <Link to="/login" className="navbar-btn-login">
-                <LogIn size={15}/>
+                <LogIn size={16}/>
                 <span>Ingresar</span>
               </Link>
               <Link to="/signup" className="navbar-btn-register">
-                <UserPlus size={15} />
+                <UserPlus size={16} />
+                <span>Registrarse</span>
+              </Link>
+            </>
+          )}
+        </div>
+        <button className="hamburger" onClick={toggleSidebar} aria-label="Abrir menú">
+          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
+        </button>
+      </div>
+      {sidebarOpen && <div className="navbar-overlay" onClick={closeSidebar}></div>}
+      <div className={`navbar-sidebar ${sidebarOpen ? 'active' : ''}`}>
+        <ul className="navbar-sidebar-links">
+          <li>
+            <Link to="/" onClick={closeSidebar}>
+              <House size={16} />
+              <span>Inicio</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/eventos" onClick={closeSidebar}>
+              <Music size={16} />
+              <span>Conciertos y Festivales</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/eventos" onClick={closeSidebar}>
+              <Drama size={16} />
+              <span>Teatro y Cultura</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/mis-eventos" onClick={closeSidebar}>
+              <Ticket size={16} />
+              <span>Mis Tickets</span>
+            </Link>
+          </li>
+        </ul>
+        <div className="navbar-sidebar-buttons">
+          {usuario ? (
+            <div className="navbar-sidebar-user">
+              <Link to="/profile" className="navbar-sidebar-username" onClick={closeSidebar}>
+                <User size={16} />
+                <span>Hola, {usuario.nombre_usuario}</span>
+              </Link>
+              <button className="navbar-sidebar-btn-login" onClick={handleLogout}>
+                <LogOut size={16} />
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="navbar-sidebar-btn-login" onClick={closeSidebar}>
+                <LogIn size={16}/>
+                <span>Ingresar</span>
+              </Link>
+              <Link to="/signup" className="navbar-sidebar-btn-register" onClick={closeSidebar}>
+                <UserPlus size={16} />
                 <span>Registrarse</span>
               </Link>
             </>
           )}
         </div>
       </div>
-      <div className="navbar-search-container">
-        <SearchBar />
+      <div className={`navbar-search-container ${searchVisible ? 'visible' : 'hidden'}`}>
+        <SearchBar onToggleSearch={toggleSearch} isVisible={searchVisible} />
       </div>
     </nav>
   );

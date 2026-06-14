@@ -7,6 +7,8 @@ import authRouter from "./routes/authRouter.js";
 import eventoRoutes from "./routes/eventoRouter.js"
 import pagoRoutes from "./routes/pagoRoutes.js"
 import ciudadRouter from "./routes/CiudadRouter.js"
+import ticketUsuarioRoutes from "./routes/ticketUsuarioRoutes.js"
+import catalogoRoutes from "./routes/catalogoRoutes.js"
 
 const app = express();
 
@@ -24,6 +26,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/eventos", eventoRoutes)
 app.use("/api/ciudad", ciudadRouter)
 app.use("/api/pagos", pagoRoutes)
+app.use("/api/mis-eventos", ticketUsuarioRoutes)
+app.use("/api/catalogo", catalogoRoutes)
 app.get("/", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"

@@ -1,70 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import {
+  Ticket,
+  Calendar,
+  MapPin,
+  CreditCard,
+  CheckCircle,
+  Clock,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { obtenerMisTickets } from "../../../Services/MisTicketsService";
 import "./MyTickets.css";
 import "../../../styles/styles.css";
 
-const MOCK_TICKETS = [
-  {
-    code: "NODUS-ABCD-EFGH-1234",
-    eventTitle: "Southern Hospitality Tour: The Black Crowes and Whiskey Myers",
-    date: "2026-06-07",
-    time: "6:30 PM",
-    venue: "Coastal Credit Union Music Park at Walnut Creek",
-    city: "Raleigh",
-    state: "NC",
-    section: "Floor GA",
-    quantity: 2,
-    total: 145,
-    image: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=600&q=80",
-    category: "concerts",
-    status: "valid",
-    purchasedAt: "2026-05-20T14:30:00",
-  },
-  {
-    code: "NODUS-WXYZ-MNOP-5678",
-    eventTitle: "Punk Rock Brunch | 90's & Y2K Anthems",
-    date: "2026-06-07",
-    time: "10:00 AM",
-    venue: "The Composers Room",
-    city: "Las Vegas",
-    state: "NV",
-    section: "VIP Table (4 persons)",
-    quantity: 4,
-    total: 134,
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80",
-    category: "concerts",
-    status: "valid",
-    purchasedAt: "2026-05-18T10:00:00",
-  },
-  {
-    code: "NODUS-PAST-EVNT-0001",
-    eventTitle: "Indigo Girls",
-    date: "2025-11-15",
-    time: "7:00 PM",
-    venue: "F.M. Kirby Center",
-    city: "Wilkes-Barre",
-    state: "PA",
-    section: "Orchestra",
-    quantity: 1,
-    total: 84,
-    image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&q=80",
-    category: "concerts",
-    status: "used",
-    purchasedAt: "2025-10-30T09:15:00",
-  },
-];
-
-function getStoredTickets() {
-  try {
-    const raw = localStorage.getItem("nodus_tickets");
-    return raw ? JSON.parse(raw) : MOCK_TICKETS;
-  } catch {
-    return MOCK_TICKETS;
-  }
-}
-
 function formatDate(dateStr) {
-  const date = new Date(dateStr + "T12:00:00");
+  if (!dateStr) return "";
+
+  const date = new Date(dateStr);
+
   return date.toLocaleDateString("es-ES", {
     weekday: "long",
     day: "2-digit",
@@ -73,8 +28,11 @@ function formatDate(dateStr) {
   });
 }
 
-function formatPurchaseDate(isoStr) {
-  const date = new Date(isoStr);
+function formatPurchaseDate(dateStr) {
+  if (!dateStr) return "";
+
+  const date = new Date(dateStr);
+
   return date.toLocaleDateString("es-ES", {
     day: "2-digit",
     month: "short",
@@ -83,83 +41,152 @@ function formatPurchaseDate(isoStr) {
 }
 
 function isUpcoming(dateStr) {
+  if (!dateStr) return false;
+
   return new Date(dateStr + "T23:59:59") >= new Date();
 }
 
-const categoryLabel = {
-  concerts: "🎸 Conciertos",
-  theater: "🎭 Teatro",
-  sports: "🏆 Deportes",
-  specials: "⭐ Especiales",
-  cities: "🏙️ Ciudades",
-};
-
-function TicketCard({ ticket, onExpand, expanded }) {
-  const upcoming = isUpcoming(ticket.date);
+function TicketCard({ ticket, expanded, onExpand }) {
+  const upcoming = isUpcoming(ticket.fecha.fechaInicio);
 
   return (
-    <div className={`mt-ticket ${ticket.status === "used" ? "used" : ""} ${expanded ? "expanded" : ""}`}>
-      {/* Top strip */}
+    <div
+      className={`mt-ticket ${
+        ticket.boleto.estadoValidacion !== "VIGENTE" ? "used" : ""
+      } ${expanded ? "expanded" : ""}`}
+    >
       <div className="mt-ticket-top">
-        <div className="mt-ticket-img" style={{ backgroundImage: `url(${ticket.image})` }}>
+        <div
+          className="mt-ticket-img"
+          style={{
+            backgroundImage: `url(${ticket.evento.imagenUrl})`,
+          }}
+        >
           <div className="mt-ticket-img-overlay" />
-          <span className={`mt-ticket-status-badge ${ticket.status}`}>
-            {ticket.status === "valid" && upcoming ? "✓ Válido" : "Utilizado"}
+
+          <span
+            className={`mt-ticket-status-badge ${
+              ticket.boleto.estadoValidacion === "VIGENTE"
+                ? "valid"
+                : "used"
+            }`}
+          >
+            {ticket.boleto.estadoValidacion === "VIGENTE" && upcoming ? (
+              <>
+                <CheckCircle size={14} />
+                Válido
+              </>
+            ) : (
+              <>
+                <Clock size={14} />
+                Utilizado
+              </>
+            )}
           </span>
         </div>
 
         <div className="mt-ticket-main">
           <div className="mt-ticket-meta-row">
-            <span className="mt-ticket-category">{categoryLabel[ticket.category]}</span>
+            <span className="mt-ticket-category">
+              {ticket.evento.categoria}
+            </span>
+
             <span className="mt-ticket-purchase-date">
-              Comprado el {formatPurchaseDate(ticket.purchasedAt)}
+              Comprado el {formatPurchaseDate(ticket.orden.fechaOrden)}
             </span>
           </div>
 
-          <h3 className="mt-ticket-title">{ticket.eventTitle}</h3>
+          <h3 className="mt-ticket-title">
+            {ticket.evento.nombreEvento}
+          </h3>
 
           <div className="mt-ticket-info-grid">
             <div className="mt-ticket-info-item">
-              <span className="mt-ticket-info-label">📅 Fecha</span>
+              <span className="mt-ticket-info-label">
+                <Calendar size={16} />
+                Fecha
+              </span>
+
               <span className="mt-ticket-info-value">
-                {formatDate(ticket.date)} · {ticket.time}
+                {formatDate(ticket.fecha.fechaInicio)} ·{" "}
+                {ticket.fecha.horaInicio}
               </span>
             </div>
+
             <div className="mt-ticket-info-item">
-              <span className="mt-ticket-info-label">📍 Venue</span>
+              <span className="mt-ticket-info-label">
+                <MapPin size={16} />
+                Recinto
+              </span>
+
               <span className="mt-ticket-info-value">
-                {ticket.venue} — {ticket.city}, {ticket.state}
+                {ticket.recinto.nombreRecinto} —{" "}
+                {ticket.ciudad.nombreCiudad}
               </span>
             </div>
+
             <div className="mt-ticket-info-item">
-              <span className="mt-ticket-info-label">🪑 Sección</span>
-              <span className="mt-ticket-info-value">{ticket.section}</span>
+              <span className="mt-ticket-info-label">
+                <Ticket size={16} />
+                Tipo
+              </span>
+
+              <span className="mt-ticket-info-value">
+                {ticket.tipoBoleto.nombreTipo}
+              </span>
             </div>
+
             <div className="mt-ticket-info-item">
-              <span className="mt-ticket-info-label">🎟️ Boletos</span>
-              <span className="mt-ticket-info-value">{ticket.quantity}</span>
+              <span className="mt-ticket-info-label">
+                <CreditCard size={16} />
+                Precio
+              </span>
+
+              <span className="mt-ticket-info-value">
+                Bs {ticket.tipoBoleto.precio}
+              </span>
             </div>
           </div>
 
-          <button className="mt-ticket-toggle" onClick={() => onExpand(ticket.code)}>
-            {expanded ? "Ocultar código ▲" : "Ver código ▼"}
+          <button
+            className="mt-ticket-toggle"
+            onClick={() => onExpand(ticket.boleto.codigo)}
+          >
+            {expanded ? (
+              <>
+                Ocultar código <ChevronUp size={16} />
+              </>
+            ) : (
+              <>
+                Ver código <ChevronDown size={16} />
+              </>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Expandable code */}
       {expanded && (
         <div className="mt-ticket-code-area">
           <div className="mt-ticket-perforations">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="mt-perf-dot" />
+            {Array.from({ length: 20 }).map((_, index) => (
+              <div key={index} className="mt-perf-dot" />
             ))}
           </div>
+
           <div className="mt-ticket-code-body">
-            <p className="mt-code-label">CÓDIGO DE CONFIRMACIÓN</p>
-            <p className="mt-code-value">{ticket.code}</p>
+            <p className="mt-code-label">
+              CÓDIGO DEL TICKET
+            </p>
+
+            <p className="mt-code-value">
+              {ticket.boleto.codigo}
+            </p>
+
             <p className="mt-code-total">
-              Total pagado: <strong>${ticket.total.toLocaleString("es-ES")}</strong>
+              Total pagado:{" "}
+              <strong>
+                Bs {ticket.pago.montoPago}
+              </strong>
             </p>
           </div>
         </div>
@@ -170,74 +197,155 @@ function TicketCard({ ticket, onExpand, expanded }) {
 
 export default function MyTickets() {
   const navigate = useNavigate();
-  const tickets = getStoredTickets();
+
+  const [tickets, setTickets] = useState([]);
   const [filter, setFilter] = useState("all");
   const [expandedCode, setExpandedCode] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filtered = tickets.filter((t) => {
-    if (filter === "upcoming") return isUpcoming(t.date) && t.status === "valid";
-    if (filter === "used") return !isUpcoming(t.date) || t.status === "used";
+  useEffect(() => {
+    const cargarTickets = async () => {
+      try {
+        setLoading(true);
+
+        const data = await obtenerMisTickets();
+
+        setTickets(data.tickets);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarTickets();
+  }, []);
+
+  const filtered = tickets.filter((ticket) => {
+    if (filter === "upcoming") {
+      return (
+        isUpcoming(ticket.fecha.fechaInicio) &&
+        ticket.boleto.estadoValidacion === "VIGENTE"
+      );
+    }
+
+    if (filter === "used") {
+      return (
+        !isUpcoming(ticket.fecha.fechaInicio) ||
+        ticket.boleto.estadoValidacion !== "VIGENTE"
+      );
+    }
+
     return true;
   });
 
   const handleExpand = (code) => {
-    setExpandedCode((prev) => (prev === code ? null : code));
+    setExpandedCode((prev) =>
+      prev === code ? null : code
+    );
   };
+
+  if (loading) {
+    return (
+      <div className="mt-page">
+        <div className="mt-empty">
+          <h3 className="mt-empty-title">
+            Cargando tickets...
+          </h3>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mt-page">
+        <div className="mt-empty">
+          <h3 className="mt-empty-title">
+            Error al cargar tickets
+          </h3>
+
+          <p className="mt-empty-sub">
+            {error}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-page">
-      {/* Header */}
       <div className="mt-header">
         <div className="mt-header-content">
           <div className="mt-header-text">
-            <span className="mt-header-icon">🎟️</span>
+            <Ticket size={36} />
+
             <div>
-              <h1 className="mt-title">Mis Tickets</h1>
+              <h1 className="mt-title">
+                Mis Tickets
+              </h1>
+
               <p className="mt-subtitle">
-                {tickets.length} boleto{tickets.length !== 1 ? "s" : ""} en tu cuenta
+                {tickets.length} boleto
+                {tickets.length !== 1 ? "s" : ""}
+                {" "}en tu cuenta
               </p>
             </div>
           </div>
-          <button className="mt-explore-btn" onClick={() => navigate("/eventos")}>
-            Explorar Eventos →
+
+          <button
+            className="mt-explore-btn"
+            onClick={() => navigate("/eventos")}
+          >
+            Explorar Eventos
+            <ArrowRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* Filters */}
       <div className="mt-filters-bar">
         <div className="mt-filters">
           {[
             { key: "all", label: "Todos" },
             { key: "upcoming", label: "Próximos" },
             { key: "used", label: "Pasados" },
-          ].map((f) => (
+          ].map((filtro) => (
             <button
-              key={f.key}
-              className={`mt-filter-btn ${filter === f.key ? "active" : ""}`}
-              onClick={() => setFilter(f.key)}
+              key={filtro.key}
+              className={`mt-filter-btn ${
+                filter === filtro.key ? "active" : ""
+              }`}
+              onClick={() => setFilter(filtro.key)}
             >
-              {f.label}
+              {filtro.label}
             </button>
           ))}
         </div>
+
         <span className="mt-filter-count">
-          {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+          {filtered.length} resultado
+          {filtered.length !== 1 ? "s" : ""}
         </span>
       </div>
 
-      {/* Content */}
       <div className="mt-content">
         {filtered.length === 0 ? (
           <div className="mt-empty">
-            <span className="mt-empty-icon">🎪</span>
-            <h3 className="mt-empty-title">No hay tickets aquí</h3>
+            <Ticket size={48} />
+
+            <h3 className="mt-empty-title">
+              No hay tickets aquí
+            </h3>
+
             <p className="mt-empty-sub">
-              {filter === "upcoming"
-                ? "No tienes eventos próximos. ¡Explora y compra tu primer boleto!"
-                : "No tienes tickets pasados todavía."}
+              No tienes tickets para mostrar.
             </p>
-            <button className="mt-explore-btn" onClick={() => navigate("/eventos")}>
+
+            <button
+              className="mt-explore-btn"
+              onClick={() => navigate("/eventos")}
+            >
               Ver Eventos
             </button>
           </div>
@@ -245,9 +353,11 @@ export default function MyTickets() {
           <div className="mt-list">
             {filtered.map((ticket) => (
               <TicketCard
-                key={ticket.code}
+                key={ticket.boleto.idBoleto}
                 ticket={ticket}
-                expanded={expandedCode === ticket.code}
+                expanded={
+                  expandedCode === ticket.boleto.codigo
+                }
                 onExpand={handleExpand}
               />
             ))}
