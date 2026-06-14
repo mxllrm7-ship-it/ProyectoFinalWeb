@@ -65,3 +65,10 @@
   padding-top: 12px;
   border-top: 2px solid #D3A373;
 }
+
+
+.card-evento-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}

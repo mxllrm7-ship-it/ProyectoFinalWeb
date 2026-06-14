@@ -1,10 +1,10 @@
 export class Usuario {
-  constructor({ id_usuario, id_rol, nombre_rol, nombre_usuario, email_usuario, telefono, username, estado_usuario, foto_rostro }) {
+  constructor({ id_usuario, id_rol, nombre_rol, nombre_usuario, correo, telefono, username, estado_usuario, foto_rostro }) {
     this.id_usuario = id_usuario
     this.id_rol = id_rol
     this.nombre_rol = nombre_rol
     this.nombre_usuario = nombre_usuario
-    this.email_usuario = email_usuario
+    this.correo = correo
     this.telefono = telefono
     this.username = username
     this.estado_usuario = estado_usuario
@@ -13,9 +13,9 @@ export class Usuario {
 }
 
 export class RegistroPayload {
-  constructor({ nombre_usuario, email_usuario, telefono, username, password, foto_rostro }) {
+  constructor({ nombre_usuario, correo, telefono, username, password, foto_rostro }) {
     this.nombre_usuario = nombre_usuario
-    this.email_usuario = email_usuario
+    this.correo = correo
     this.telefono = telefono
     this.username = username
     this.password = password
@@ -31,10 +31,10 @@ export class LoginPayload {
 }
 
 export class EditarPerfilPayload {
-  constructor({ id_usuario, nombre_usuario, email_usuario, telefono, username, foto_rostro }) {
+  constructor({ id_usuario, nombre_usuario, correo, telefono, username, foto_rostro }) {
     this.id_usuario = id_usuario
     this.nombre_usuario = nombre_usuario
-    this.email_usuario = email_usuario
+    this.correo = correo
     this.telefono = telefono
     this.username = username
     this.foto_rostro = foto_rostro ?? null

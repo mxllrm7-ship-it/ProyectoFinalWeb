@@ -49,24 +49,6 @@ export default function NavBar() {
             </Link>
           </li>
           <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <Trophy size={15} />
-              <span>Deportes</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <Star size={15}/>
-              <span>Especiales</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <MapPinned size={15} />
-              <span>Ciudades</span>
-            </Link>
-          </li>
-          <li>
             <Link to="/mis-eventos" onClick={closeSidebar}>
               <Ticket size={15} />
               <span>Mis Tickets</span>

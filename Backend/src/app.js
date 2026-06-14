@@ -4,6 +4,9 @@ import cors from "cors";
 
 import usuarioRouter from "./routes/usuarioRouter.js";
 import authRouter from "./routes/authRouter.js";
+import eventoRoutes from "./routes/eventoRouter.js"
+import pagoRoutes from "./routes/pagoRoutes.js"
+import ciudadRouter from "./routes/CiudadRouter.js"
 
 const app = express();
 
@@ -18,6 +21,9 @@ app.use(
 app.use(express.json());
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/eventos", eventoRoutes)
+app.use("/api/ciudad", ciudadRouter)
+app.use("/api/pagos", pagoRoutes)
 app.get("/", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"

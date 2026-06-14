@@ -8,18 +8,26 @@ export function AuthProvider({ children }) {
     return stored ? JSON.parse(stored) : null;
   });
 
-  const login = (data) => {
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("token") ?? null;
+  });
+
+  const login = (data, tkn) => {
     localStorage.setItem("usuario", JSON.stringify(data));
+    localStorage.setItem("token", tkn);
     setUsuario(data);
+    setToken(tkn);
   };
 
   const logout = () => {
     localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
     setUsuario(null);
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ usuario, login, logout }}>
+    <AuthContext.Provider value={{ usuario, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -18,8 +18,8 @@ export default function LogInUser() {
     setError('');
     setLoading(true);
     try {
-      const usuario = await loginUsuario({ username, password });
-      login(usuario);
+      const { usuario, token } = await loginUsuario({ username, password });
+      login(usuario, token);
       navigate('/');
     } catch (err) {
       setError(err.message);

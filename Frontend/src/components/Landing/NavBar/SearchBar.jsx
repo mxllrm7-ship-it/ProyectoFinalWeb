@@ -1,37 +1,46 @@
-import React, { useState } from 'react';
-import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/dist/style.css';
-import './SearchBar.css';
+import React, { useEffect, useState } from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import "./SearchBar.css";
 import "../../../styles/styles.css";
-
-const CITIES = [
-  'Santa Cruz de la Sierra',
-  'La Paz',
-  'Cochabamba',
-  'Sucre',
-  'Oruro',
-  'Potosí',
-  'Tarija',
-  'Trinidad',
-  'Cobija'
-];
+import { obtenerCiudades } from "../../../services/CiudadService";
 
 export default function SearchBar() {
-  const [selectedCity, setSelectedCity] = useState('');
+  const [ciudades, setCiudades] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("");
   const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-  const filteredCities = CITIES.filter(city =>
-    city.toLowerCase().includes(selectedCity.toLowerCase())
+  useEffect(() => {
+    const cargarCiudades = async () => {
+      try {
+        const data = await obtenerCiudades();
+        setCiudades(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    cargarCiudades();
+  }, []);
+
+  const filteredCities = ciudades.filter((ciudad) =>
+    ciudad.nombre_ciudad
+      .toLowerCase()
+      .includes(selectedCity.toLowerCase())
   );
 
   const formatDate = (date) => {
-    if (!date) return '';
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (!date) return "";
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   return (
@@ -40,6 +49,7 @@ export default function SearchBar() {
         <div className="search-bar-row-2">
           <div className="city-selector">
             <label className="search-label">Ciudad</label>
+
             <div className="combobox-wrapper">
               <input
                 type="text"
@@ -52,18 +62,19 @@ export default function SearchBar() {
                 placeholder="Selecciona una ciudad"
                 className="combobox-input"
               />
+
               {showCityDropdown && (
                 <div className="dropdown-list">
-                  {filteredCities.map(city => (
+                  {filteredCities.map((ciudad) => (
                     <div
-                      key={city}
+                      key={ciudad.id_ciudad}
                       className="dropdown-item"
                       onClick={() => {
-                        setSelectedCity(city);
+                        setSelectedCity(ciudad.nombre_ciudad);
                         setShowCityDropdown(false);
                       }}
                     >
-                      {city}
+                      {ciudad.nombre_ciudad}
                     </div>
                   ))}
                 </div>
@@ -74,6 +85,7 @@ export default function SearchBar() {
           <div className="date-range-picker">
             <div className="date-picker-group">
               <label className="search-label">Fecha Inicio</label>
+
               <div className="date-input-wrapper">
                 <input
                   type="text"
@@ -86,6 +98,7 @@ export default function SearchBar() {
                   placeholder="DD/MM/YYYY"
                   className="date-input"
                 />
+
                 {showStartCalendar && (
                   <div className="calendar-popup">
                     <DayPicker
@@ -106,6 +119,7 @@ export default function SearchBar() {
 
             <div className="date-picker-group">
               <label className="search-label">Fecha Final</label>
+
               <div className="date-input-wrapper">
                 <input
                   type="text"
@@ -118,6 +132,7 @@ export default function SearchBar() {
                   placeholder="DD/MM/YYYY"
                   className="date-input"
                 />
+
                 {showEndCalendar && (
                   <div className="calendar-popup">
                     <DayPicker
@@ -139,6 +154,7 @@ export default function SearchBar() {
 
           <div className="search-input-group">
             <label className="search-label">Búsqueda</label>
+
             <input
               type="text"
               value={searchQuery}
@@ -154,3 +170,4 @@ export default function SearchBar() {
     </div>
   );
 }
+

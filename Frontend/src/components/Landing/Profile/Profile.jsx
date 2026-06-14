@@ -14,7 +14,7 @@ export default function ProfileUser() {
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     nombre_usuario: '',
-    email_usuario: '',
+    correo: '',
     telefono: '',
     username: ''
   })
@@ -23,7 +23,7 @@ export default function ProfileUser() {
     if (!usuario) navigate('/login')
     else setForm({
       nombre_usuario: usuario.nombre_usuario,
-      email_usuario: usuario.email_usuario,
+      correo: usuario.correo,
       telefono: usuario.telefono,
       username: usuario.username
     })
@@ -52,7 +52,7 @@ export default function ProfileUser() {
   const handleCancelar = () => {
     setForm({
       nombre_usuario: usuario.nombre_usuario,
-      email_usuario: usuario.email_usuario,
+      correo: usuario.correo,
       telefono: usuario.telefono,
       username: usuario.username
     })
@@ -132,8 +132,8 @@ export default function ProfileUser() {
             <div className="profile-info-content">
               <span className="profile-info-label">Correo electrónico</span>
               {editando
-                ? <input className="profile-input" name="email_usuario" type="email" value={form.email_usuario} onChange={handleChange} />
-                : <span className="profile-info-value">{usuario.email_usuario}</span>
+                ? <input className="profile-input" name="correo" type="email" value={form.correo} onChange={handleChange} />
+                : <span className="profile-info-value">{usuario.correo}</span>
               }
             </div>
           </div>

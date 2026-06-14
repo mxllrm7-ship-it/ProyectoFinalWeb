@@ -5,7 +5,7 @@ import { registrarUsuario } from '../../../services/usuarioService';
 
 export default function SignUpUser() {
   const [nombre_usuario, setNombre_usuario] = useState('');
-  const [email_usuario, setEmail_usuario] = useState('');
+  const [correo, setCorreo] = useState('');
   const [telefono, setTelefono] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -45,7 +45,7 @@ export default function SignUpUser() {
 
     setLoading(true);
     try {
-      const usuario = await registrarUsuario({ nombre_usuario, email_usuario, telefono, username, password, foto_rostro: null });
+      const usuario = await registrarUsuario({ nombre_usuario, correo, telefono, username, password, foto_rostro: null });
       console.log('Usuario registrado:', usuario);
       window.location.href = '/login';
     } catch (err) {
@@ -74,13 +74,13 @@ export default function SignUpUser() {
           </div>
 
           <div className="signup-form-group">
-            <label htmlFor="email_usuario" className="signup-label">Correo Electrónico</label>
+            <label htmlFor="correo" className="signup-label">Correo Electrónico</label>
             <input
               type="email"
-              id="email_usuario"
+              id="correo"
               className="signup-input"
-              value={email_usuario}
-              onChange={(e) => setEmail_usuario(e.target.value)}
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
               placeholder="tu@email.com"
               required
             />

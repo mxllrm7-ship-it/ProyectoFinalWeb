@@ -1,438 +1,392 @@
-import { useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router";
-import eventsData from "../data/Eventsdata.json";
-import "./EventDetail.css";
-import "../../../styles/styles.css";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { obtenerDetalleEvento } from "../../../services/EventoService";
+import "./Eventdetail.css";
 
-function generateTicketCode(eventId, section) {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "NODUS-";
-  for (let i = 0; i < 12; i++) {
-    if (i === 4 || i === 8) code += "-";
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
-
-function formatDate(dateStr) {
-  const date = new Date(dateStr + "T12:00:00");
-  return date.toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-export default function EventDetail() {
+export default function EventPay() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const event = eventsData.find((e) => e.id === id);
+  const [evento, setEvento] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [carrito, setCarrito] = useState({});
+  const [imagenPrincipal, setImagenPrincipal] = useState(null);
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    section: "",
-    quantity: 1,
-    cardNumber: "",
-    cardExpiry: "",
-    cardCvv: "",
-    cardName: "",
-  });
+  useEffect(() => {
+    const cargarDetalles = async () => {
+      try {
+        setLoading(true);
 
-  const [step, setStep] = useState(1); // 1 = info, 2 = payment, 3 = confirmation
-  const [ticketCode, setTicketCode] = useState("");
-  const [errors, setErrors] = useState({});
-  const confirmRef = useRef(null);
+       
 
-  if (!event) {
+        const datos = await obtenerDetalleEvento(id);
+         console.log("Respuesta completa:", datos);
+        console.log("Evento:", datos.evento);
+        console.log("Fecha:", datos.fecha);
+        console.log("Recinto:", datos.recinto);
+        console.log("Ciudad:", datos.ciudad);
+        console.log("Organizador:", datos.organizador);
+        console.log("Media:", datos.media);
+        console.log("Invitados:", datos.invitados);
+        console.log("Tipos boleto:", datos.tiposBoleto);
+        console.log("Estadísticas:", datos.estadisticas);
+        setEvento(datos);
+        if (datos.evento.imagenUrl) {
+          setImagenPrincipal(datos.evento.imagenUrl);
+        } else if (datos.media && datos.media.length > 0) {
+          setImagenPrincipal(datos.media[0].url);
+        }
+      } catch (err) {
+        setError(err.message || "Error al cargar el evento");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDetalles();
+  }, [id]);
+
+  const actualizarCarrito = (tipoBoletoId, cantidad) => {
+    setCarrito((prev) => {
+      const nuevo = { ...prev };
+      if (cantidad > 0) {
+        nuevo[tipoBoletoId] = cantidad;
+      } else {
+        delete nuevo[tipoBoletoId];
+      }
+      return nuevo;
+    });
+  };
+
+  const calcularTotales = () => {
+    if (!evento) return { subtotal: 0, descuento: 0, total: 0 };
+
+    let subtotal = 0;
+    Object.entries(carrito).forEach(([tipoBoletoId, cantidad]) => {
+      const tipoboleto = evento.tiposBoleto.find(
+        (t) => t.id.toString() === tipoBoletoId.toString(),
+      );
+      if (tipoboleto) {
+        subtotal += tipoboleto.precio * cantidad;
+      }
+    });
+
+    const descuento = (subtotal * evento.evento.descuento) / 100;
+    const total = subtotal - descuento;
+
+    return { subtotal, descuento, total };
+  };
+
+  const cantidadBoletos = Object.values(carrito).reduce(
+    (sum, qty) => sum + qty,
+    0,
+  );
+  const { subtotal, descuento, total } = calcularTotales();
+
+  if (loading) {
     return (
-      <div className="ed-not-found">
-        <h2>Evento no encontrado</h2>
-        <button onClick={() => navigate(-1)}>Volver</button>
+      <div className="ep-container ep-loading">
+        <div className="ep-spinner"></div>
+        <p>Cargando evento...</p>
       </div>
     );
   }
 
-  const selectedSeat = event.seats.find((s) => s.section === form.section);
-  const subtotal = selectedSeat ? selectedSeat.price * form.quantity : 0;
-  const fee = Math.round(subtotal * 0.12);
-  const total = subtotal + fee;
+  if (error) {
+    return (
+      <div className="ep-container ep-error">
+        <div className="ep-error-content">
+          <h2>Error</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
-  const validate = () => {
-    const e = {};
-    if (!form.name.trim()) e.name = "Nombre requerido";
-    if (!form.email.match(/^[^@]+@[^@]+\.[^@]+$/)) e.email = "Email inválido";
-    if (!form.phone.trim()) e.phone = "Teléfono requerido";
-    if (!form.section) e.section = "Selecciona una sección";
-    return e;
-  };
+  if (!evento) {
+    return (
+      <div className="ep-container ep-error">
+        <div className="ep-error-content">
+          <h2>Evento no encontrado</h2>
+        </div>
+      </div>
+    );
+  }
 
-  const validatePayment = () => {
-    const e = {};
-    if (!form.cardName.trim()) e.cardName = "Nombre requerido";
-    if (!form.cardNumber.replace(/\s/g, "").match(/^\d{16}$/))
-      e.cardNumber = "Número de tarjeta inválido (16 dígitos)";
-    if (!form.cardExpiry.match(/^\d{2}\/\d{2}$/))
-      e.cardExpiry = "Formato MM/AA";
-    if (!form.cardCvv.match(/^\d{3,4}$/)) e.cardCvv = "CVV inválido";
-    return e;
-  };
-
-  const handleChange = (field, value) => {
-    setForm((f) => ({ ...f, [field]: value }));
-    setErrors((e) => ({ ...e, [field]: undefined }));
-  };
-
-  const handleCardNumber = (val) => {
-    const digits = val.replace(/\D/g, "").slice(0, 16);
-    const formatted = digits.replace(/(.{4})/g, "$1 ").trim();
-    handleChange("cardNumber", formatted);
-  };
-
-  const handleExpiry = (val) => {
-    const digits = val.replace(/\D/g, "").slice(0, 4);
-    const formatted = digits.length > 2 ? digits.slice(0, 2) + "/" + digits.slice(2) : digits;
-    handleChange("cardExpiry", formatted);
-  };
-
-  const goToPayment = () => {
-    const e = validate();
-    if (Object.keys(e).length > 0) {
-      setErrors(e);
-      return;
-    }
-    setStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePayment = () => {
-    const e = validatePayment();
-    if (Object.keys(e).length > 0) {
-      setErrors(e);
-      return;
-    }
-    const code = generateTicketCode(event.id, form.section);
-    setTicketCode(code);
-    setStep(3);
-    setTimeout(() => {
-      confirmRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  };
+  const {
+    evento: eventoData,
+    fecha,
+    recinto,
+    ciudad,
+    organizador,
+    media,
+    invitados,
+    tiposBoleto,
+    estadisticas,
+  } = evento;
 
   return (
-    <div className="ed-page">
-      {/* Hero */}
-      <div className="ed-hero" style={{ backgroundImage: `url(${event.image})` }}>
-        <div className="ed-hero-overlay" />
-        <div className="ed-hero-content">
-          <button className="ed-back-btn" onClick={() => navigate(-1)}>
-            ← Volver
-          </button>
-          <div className="ed-hero-meta">
-            <span className="ed-hero-category">
-              {event.category === "concerts" && "🎸 Conciertos"}
-              {event.category === "theater" && "🎭 Teatro & Cultura"}
-              {event.category === "sports" && "🏆 Deportes"}
-              {event.category === "specials" && "⭐ Especiales"}
-              {event.category === "cities" && "🏙️ Ciudades"}
-            </span>
-            <h1 className="ed-hero-title">{event.title}</h1>
-            <div className="ed-hero-info">
-              <span>📅 {formatDate(event.date)} · {event.time}</span>
-              <span>📍 {event.venue} — {event.city}, {event.state}</span>
-            </div>
+    <div className="ep-page">
+      <div
+        className="ep-hero"
+        style={{ backgroundImage: `url(${imagenPrincipal})` }}
+      >
+        <div className="ep-hero-overlay"></div>
+        <div className="ep-hero-content">
+          <div className="ep-breadcrumb">
+            {ciudad && <span>{ciudad.nombreCiudad}</span>}
+            <span className="ep-separator">•</span>
+            {eventoData.categoria && <span>{eventoData.categoria}</span>}
           </div>
+          <h1 className="ep-titulo-principal">{eventoData.nombreEvento}</h1>
         </div>
       </div>
 
-      <div className="ed-body">
-        {/* Left: info + form */}
-        <div className="ed-main">
-          {/* Lineup */}
-          <div className="ed-section">
-            <h2 className="ed-section-title">Descripción</h2>
-            <p className="ed-description">{event.description}</p>
-          </div>
+      <div className="ep-content">
+        <main className="ep-main">
+          <section className="ep-section">
+            <h2>Fecha y Horario</h2>
+            <div className="ep-grid-2">
+              <div className="ep-info-block">
+                <span className="ep-label">Inicio</span>
+                <div className="ep-value">{fecha.fechaInicio}</div>
+                <div className="ep-value-secondary">{fecha.horaInicio}</div>
+              </div>
+              <div className="ep-info-block">
+                <span className="ep-label">Finalización</span>
+                <div className="ep-value">{fecha.fechaFin}</div>
+                <div className="ep-value-secondary">{fecha.horaFin}</div>
+              </div>
+            </div>
+          </section>
 
-          {event.lineup && event.lineup.length > 0 && (
-            <div className="ed-section">
-              <h2 className="ed-section-title">Artistas</h2>
-              <div className="ed-lineup">
-                {event.lineup.map((a, i) => (
-                  <span key={i} className="ed-artist-chip">{a}</span>
+          <section className="ep-section">
+            <h2>Ubicación</h2>
+            <div className="ep-recinto-info">
+              <h3>{recinto.nombreRecinto}</h3>
+              <p className="ep-direccion">{recinto.direccionRecinto}</p>
+              <div className="ep-grid-2">
+                <div className="ep-info-item">
+                  <span className="ep-label">Tipo</span>
+                  <span className="ep-value">{recinto.tipoRecinto}</span>
+                </div>
+                <div className="ep-info-item">
+                  <span className="ep-label">Capacidad</span>
+                  <span className="ep-value">{recinto.capacidad} personas</span>
+                </div>
+              </div>
+              {recinto.descripcionRecinto && (
+                <p className="ep-descripcion">{recinto.descripcionRecinto}</p>
+              )}
+              {recinto.linkUbicacion && (
+                <a
+                  href={recinto.linkUbicacion}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ep-link-ubicacion"
+                >
+                  Ver en mapa
+                </a>
+              )}
+            </div>
+          </section>
+
+          {eventoData.descuento > 0 && (
+            <section className="ep-section ep-descuento-banner">
+              <span className="ep-badge-descuento">
+                ¡Descuento de {eventoData.descuento}%!
+              </span>
+            </section>
+          )}
+
+          <section className="ep-section">
+            <h2>Organizador</h2>
+            <div className="ep-organizador">
+              {organizador.fotoPerfil && (
+                <img
+                  src={organizador.fotoPerfil}
+                  alt={organizador.nombreUsuario}
+                  className="ep-foto-perfil"
+                />
+              )}
+              <div>
+                <h4>{organizador.nombreUsuario}</h4>
+              </div>
+            </div>
+          </section>
+
+          {media && media.length > 0 && (
+            <section className="ep-section">
+              <h2>Galería</h2>
+              <div className="ep-galeria">
+                {media.map((m) => (
+                  <div key={m.id} className="ep-galeria-item">
+                    <img src={m.url} alt={`Imagen ${m.orden}`} />
+                  </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Step indicator */}
-          {step < 3 && (
-            <div className="ed-steps">
-              <div className={`ed-step ${step >= 1 ? "active" : ""}`}>
-                <span>1</span> Datos
+          {invitados && invitados.length > 0 && (
+            <section className="ep-section">
+              <h2>Invitados</h2>
+              <div className="ep-invitados-lista">
+                {invitados.map((inv) => (
+                  <div key={inv.idInvitado} className="ep-invitado-card">
+                    <h4>{inv.nombreInvitado}</h4>
+                    <div className="ep-invitado-info">
+                      <span className="ep-badge">{inv.tipoInvitado}</span>
+                      <span className="ep-estado">{inv.estadoInvitado}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="ed-step-divider" />
-              <div className={`ed-step ${step >= 2 ? "active" : ""}`}>
-                <span>2</span> Pago
-              </div>
-              <div className="ed-step-divider" />
-              <div className={`ed-step ${step >= 3 ? "active" : ""}`}>
-                <span>3</span> Confirmación
-              </div>
-            </div>
+            </section>
           )}
 
-          {/* ── STEP 1: Info ── */}
-          {step === 1 && (
-            <div className="ed-section ed-form-section">
-              <h2 className="ed-section-title">Selecciona tus Boletos</h2>
-
-              <div className="ed-form-group">
-                <label>Sección / Asientos *</label>
-                <select
-                  value={form.section}
-                  onChange={(e) => handleChange("section", e.target.value)}
-                  className={errors.section ? "error" : ""}
-                >
-                  <option value="">— Selecciona una sección —</option>
-                  {event.seats.map((s, i) => (
-                    <option key={i} value={s.section}>
-                      {s.section} — ${s.price} / persona
-                    </option>
-                  ))}
-                </select>
-                {errors.section && <span className="ed-error">{errors.section}</span>}
-              </div>
-
-              <div className="ed-form-group">
-                <label>Cantidad de boletos</label>
-                <select
-                  value={form.quantity}
-                  onChange={(e) => handleChange("quantity", Number(e.target.value))}
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                    <option key={n} value={n}>{n} boleto{n > 1 ? "s" : ""}</option>
-                  ))}
-                </select>
-              </div>
-
-              <h2 className="ed-section-title" style={{ marginTop: "28px" }}>
-                Información Personal
-              </h2>
-
-              <div className="ed-form-row">
-                <div className="ed-form-group">
-                  <label>Nombre completo *</label>
-                  <input
-                    type="text"
-                    placeholder="Juan Pérez"
-                    value={form.name}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                    className={errors.name ? "error" : ""}
-                  />
-                  {errors.name && <span className="ed-error">{errors.name}</span>}
-                </div>
-                <div className="ed-form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    placeholder="juan@email.com"
-                    value={form.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                    className={errors.email ? "error" : ""}
-                  />
-                  {errors.email && <span className="ed-error">{errors.email}</span>}
-                </div>
-              </div>
-
-              <div className="ed-form-group">
-                <label>Teléfono *</label>
-                <input
-                  type="tel"
-                  placeholder="+591 70000000"
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  className={errors.phone ? "error" : ""}
-                />
-                {errors.phone && <span className="ed-error">{errors.phone}</span>}
-              </div>
-
-              <button className="ed-primary-btn" onClick={goToPayment}>
-                Continuar al Pago →
-              </button>
+          <section className="ep-section">
+            <h2>Selecciona tus Boletos</h2>
+            <div className="ep-boletos-grid">
+              {tiposBoleto &&
+                tiposBoleto.map((tipo) => (
+                  <div key={tipo.id} className="ep-boleto-card">
+                    <div className="ep-boleto-header">
+                      <h3>{tipo.nombreTipo}</h3>
+                      <div className="ep-precio-grande">${tipo.precio}</div>
+                    </div>
+                    {tipo.imagenUrl && (
+                      <img
+                        src={tipo.imagenUrl}
+                        alt={tipo.nombreTipo}
+                        className="ep-boleto-imagen"
+                      />
+                    )}
+                    {tipo.descripcion && (
+                      <p className="ep-boleto-descripcion">
+                        {tipo.descripcion}
+                      </p>
+                    )}
+                    <div className="ep-disponibilidad">
+                      <span className="ep-disponibles">
+                        {tipo.cantidadDisponible} disponibles
+                      </span>
+                    </div>
+                    <div className="ep-selector-cantidad">
+                      <button
+                        className="ep-btn-cantidad"
+                        onClick={() =>
+                          actualizarCarrito(
+                            tipo.id,
+                            (carrito[tipo.id] || 0) - 1,
+                          )
+                        }
+                      >
+                        −
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        max={tipo.cantidadDisponible}
+                        value={carrito[tipo.id] || 0}
+                        onChange={(e) =>
+                          actualizarCarrito(
+                            tipo.id,
+                            Math.max(0, parseInt(e.target.value) || 0),
+                          )
+                        }
+                        className="ep-input-cantidad"
+                      />
+                      <button
+                        className="ep-btn-cantidad"
+                        onClick={() =>
+                          actualizarCarrito(
+                            tipo.id,
+                            (carrito[tipo.id] || 0) + 1,
+                          )
+                        }
+                        disabled={
+                          tipo.cantidadDisponible <= (carrito[tipo.id] || 0)
+                        }
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
             </div>
-          )}
+          </section>
+        </main>
 
-          {/* ── STEP 2: Payment ── */}
-          {step === 2 && (
-            <div className="ed-section ed-form-section">
-              <h2 className="ed-section-title">Datos de Pago</h2>
+        <aside className="ep-sidebar">
+          <div className="ep-carrito-resumen">
+            <h3>Resumen de Compra</h3>
 
-              <div className="ed-form-group">
-                <label>Nombre en la tarjeta *</label>
-                <input
-                  type="text"
-                  placeholder="JUAN PÉREZ"
-                  value={form.cardName}
-                  onChange={(e) => handleChange("cardName", e.target.value.toUpperCase())}
-                  className={errors.cardName ? "error" : ""}
-                />
-                {errors.cardName && <span className="ed-error">{errors.cardName}</span>}
+            {cantidadBoletos > 0 && (
+              <div className="ep-carrito-items">
+                {tiposBoleto.map((tipo) => {
+                  const cantidad = carrito[tipo.id];
+                  if (!cantidad) return null;
+                  return (
+                    <div key={tipo.id} className="ep-carrito-item">
+                      <span className="ep-item-nombre">{tipo.nombreTipo}</span>
+                      <span className="ep-item-cantidad">x{cantidad}</span>
+                      <span className="ep-item-precio">
+                        ${(tipo.precio * cantidad).toFixed(2)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div
+              className={`ep-carrito-totales ${cantidadBoletos > 0 ? "ep-tiene-items" : ""}`}
+            >
+              <div className="ep-total-row">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
               </div>
 
-              <div className="ed-form-group">
-                <label>Número de tarjeta *</label>
-                <input
-                  type="text"
-                  placeholder="1234 5678 9012 3456"
-                  value={form.cardNumber}
-                  onChange={(e) => handleCardNumber(e.target.value)}
-                  maxLength={19}
-                  className={errors.cardNumber ? "error" : ""}
-                />
-                {errors.cardNumber && <span className="ed-error">{errors.cardNumber}</span>}
-              </div>
-
-              <div className="ed-form-row">
-                <div className="ed-form-group">
-                  <label>Vencimiento *</label>
-                  <input
-                    type="text"
-                    placeholder="MM/AA"
-                    value={form.cardExpiry}
-                    onChange={(e) => handleExpiry(e.target.value)}
-                    maxLength={5}
-                    className={errors.cardExpiry ? "error" : ""}
-                  />
-                  {errors.cardExpiry && <span className="ed-error">{errors.cardExpiry}</span>}
+              {eventoData.descuento > 0 && (
+                <div className="ep-total-row ep-descuento">
+                  <span>Descuento ({eventoData.descuento}%)</span>
+                  <span>-${descuento.toFixed(2)}</span>
                 </div>
-                <div className="ed-form-group">
-                  <label>CVV *</label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    value={form.cardCvv}
-                    onChange={(e) =>
-                      handleChange("cardCvv", e.target.value.replace(/\D/g, "").slice(0, 4))
-                    }
-                    maxLength={4}
-                    className={errors.cardCvv ? "error" : ""}
-                  />
-                  {errors.cardCvv && <span className="ed-error">{errors.cardCvv}</span>}
-                </div>
+              )}
+
+              <div className="ep-total-row ep-total">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
               </div>
-
-              <div className="ed-payment-note">
-                🔒 Tus datos están protegidos con encriptación SSL de 256 bits.
-              </div>
-
-              <div className="ed-btn-row">
-                <button className="ed-secondary-btn" onClick={() => setStep(1)}>
-                  ← Atrás
-                </button>
-                <button className="ed-primary-btn" onClick={handlePayment}>
-                  Pagar ${total.toLocaleString("es-ES")} →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 3: Confirmation ── */}
-          {step === 3 && (
-            <div className="ed-section ed-confirmation" ref={confirmRef}>
-              <div className="ed-confirm-icon">🎉</div>
-              <h2 className="ed-confirm-title">¡Compra Exitosa!</h2>
-              <p className="ed-confirm-sub">
-                Tus boletos han sido reservados. Guarda tu código de confirmación.
-              </p>
-
-              <div className="ed-ticket">
-                <div className="ed-ticket-header">
-                  <span>🎟️ NODUS TICKET</span>
-                  <span className="ed-ticket-valid">✓ VÁLIDO</span>
-                </div>
-                <div className="ed-ticket-divider" />
-                <div className="ed-ticket-event">{event.title}</div>
-                <div className="ed-ticket-details">
-                  <div>
-                    <strong>Fecha</strong>
-                    <span>{formatDate(event.date)} · {event.time}</span>
-                  </div>
-                  <div>
-                    <strong>Venue</strong>
-                    <span>{event.venue}</span>
-                  </div>
-                  <div>
-                    <strong>Sección</strong>
-                    <span>{form.section}</span>
-                  </div>
-                  <div>
-                    <strong>Boletos</strong>
-                    <span>{form.quantity}</span>
-                  </div>
-                  <div>
-                    <strong>Titular</strong>
-                    <span>{form.name}</span>
-                  </div>
-                </div>
-                <div className="ed-ticket-divider dotted" />
-                <div className="ed-ticket-code-label">CÓDIGO DE CONFIRMACIÓN</div>
-                <div className="ed-ticket-code">{ticketCode}</div>
-                <div className="ed-ticket-total">
-                  Total pagado: <strong>${total.toLocaleString("es-ES")}</strong>
-                </div>
-              </div>
-
-              <p className="ed-confirm-email">
-                Una copia fue enviada a <strong>{form.email}</strong>
-              </p>
 
               <button
-                className="ed-primary-btn"
-                style={{ marginTop: "24px" }}
-                onClick={() => navigate("/")}
+                className="ep-btn-comprar"
+                disabled={cantidadBoletos === 0}
               >
-                Volver al inicio
+                {cantidadBoletos > 0
+                  ? `Comprar ${cantidadBoletos} ${cantidadBoletos === 1 ? "boleto" : "boletos"}`
+                  : "Selecciona boletos"}
               </button>
             </div>
-          )}
-        </div>
 
-        {/* Right: order summary (hidden on step 3) */}
-        {step < 3 && (
-          <aside className="ed-sidebar">
-            <div className="ed-summary-card">
-              <h3 className="ed-summary-title">Resumen de Orden</h3>
-              <div className="ed-summary-event">
-                <img src={event.image} alt={event.title} />
-                <div>
-                  <strong>{event.title}</strong>
-                  <span>{formatDate(event.date)}</span>
-                  <span>{event.venue}</span>
-                </div>
-              </div>
-              <div className="ed-summary-lines">
-                <div className="ed-summary-line">
-                  <span>
-                    {form.section || "Sin sección"} × {form.quantity}
+            {estadisticas && (
+              <div className="ep-estadisticas">
+                <div className="ep-estadistica-item">
+                  <span className="ep-estadistica-label">Disponibles</span>
+                  <span className="ep-estadistica-valor">
+                    {estadisticas.totalDisponible}
                   </span>
-                  <span>${subtotal.toLocaleString("es-ES")}</span>
                 </div>
-                <div className="ed-summary-line fee">
-                  <span>Cargo por servicio (12%)</span>
-                  <span>${fee.toLocaleString("es-ES")}</span>
-                </div>
-                <div className="ed-summary-divider" />
-                <div className="ed-summary-line total">
-                  <span>Total</span>
-                  <strong>${total.toLocaleString("es-ES")}</strong>
+                <div className="ep-estadistica-item">
+                  <span className="ep-estadistica-label">Rango de Precio</span>
+                  <span className="ep-estadistica-valor">
+                    ${estadisticas.precioMinimo} - ${estadisticas.precioMaximo}
+                  </span>
                 </div>
               </div>
-            </div>
-          </aside>
-        )}
+            )}
+          </div>
+        </aside>
       </div>
     </div>
   );
