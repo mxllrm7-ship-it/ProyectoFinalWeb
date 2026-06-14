@@ -1,87 +1,170 @@
-import { useMemo } from "react";
-import {
-  Music,
-  Theater,
-  Trophy,
-  Star,
-  Building2,
-  Ticket,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Ticket } from "lucide-react";
 import EventCard from "../EventCard/EventCard";
-import eventsData from "../data/Eventsdata.json";
+import {
+  obtenerCatalogoEventos,
+  obtenerCategoriasEventos,
+  obtenerEventosPorCategoria,
+  buscarEventosPorNombre,
+} from "../../../Services/CatalogoService";
 import "./EventsPage.css";
 import "../../../styles/styles.css";
 
-const categoryMeta = {
-  concerts: {
-    label: "Conciertos & Festivales",
-    icon: Music,
-    description: "Los mejores artistas y bandas en vivo cerca de ti.",
-  },
-  theater: {
-    label: "Teatro & Cultura",
-    icon: Theater,
-    description: "Experiencias culturales únicas: teatro, cine en vivo y más.",
-  },
-  sports: {
-    label: "Deportes",
-    icon: Trophy,
-    description: "Vive la emoción del deporte en vivo desde las gradas.",
-  },
-  specials: {
-    label: "Especiales",
-    icon: Star,
-    description: "Eventos únicos e irrepetibles que no te puedes perder.",
-  },
-  cities: {
-    label: "Ciudades",
-    icon: Building2,
-    description: "Descubre los mejores eventos en cada ciudad.",
-  },
-};
+export default function EventsPage() {
+  const [eventos, setEventos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [loading, setLoading] = useState(true);
 
-export default function EventsPage({ category }) {
-  const filtered = useMemo(() => {
-    if (!category || category === "all") return eventsData;
-    return eventsData.filter((e) => e.category === category);
-  }, [category]);
-
-  const meta = categoryMeta[category] || {
-    label: "Todos los Eventos",
-    icon: Ticket,
-    description: "Explora todos los eventos disponibles.",
+  const cargarEventos = async () => {
+    try {
+      setLoading(true);
+      const data = await obtenerCatalogoEventos();
+      setEventos(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const Icon = meta.icon;
+  const cargarCategorias = async () => {
+    try {
+      const data = await obtenerCategoriasEventos();
+      setCategorias(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    cargarEventos();
+    cargarCategorias();
+  }, []);
+
+  const handleBuscar = async (valor) => {
+    setBusqueda(valor);
+
+    try {
+      setLoading(true);
+
+      if (!valor.trim()) {
+        if (categoriaSeleccionada) {
+          const data = await obtenerEventosPorCategoria(
+            categoriaSeleccionada
+          );
+          setEventos(data);
+        } else {
+          const data = await obtenerCatalogoEventos();
+          setEventos(data);
+        }
+
+        return;
+      }
+
+      const data = await buscarEventosPorNombre(valor);
+      setEventos(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCategoria = async (categoria) => {
+    setCategoriaSeleccionada(categoria);
+
+    try {
+      setLoading(true);
+
+      if (!categoria) {
+        if (busqueda.trim()) {
+          const data = await buscarEventosPorNombre(busqueda);
+          setEventos(data);
+        } else {
+          const data = await obtenerCatalogoEventos();
+          setEventos(data);
+        }
+
+        return;
+      }
+
+      const data = await obtenerEventosPorCategoria(categoria);
+      setEventos(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="events-page">
       <div className="events-hero">
         <div className="events-hero-content">
-          <Icon className="events-hero-icon" size={48} />
-          <h1 className="events-hero-title">{meta.label}</h1>
-          <p className="events-hero-desc">{meta.description}</p>
+          <Ticket className="events-hero-icon" size={48} />
+          <h1 className="events-hero-title">Descubre Eventos</h1>
+          <p className="events-hero-desc">
+            Encuentra conciertos, festivales, deportes, cultura y mucho más.
+          </p>
         </div>
         <div className="events-hero-bg" />
       </div>
 
+      <div className="events-filters">
+        <div className="events-search">
+          <Search size={18} />
+          <input
+            type="text"
+            placeholder="Buscar evento..."
+            value={busqueda}
+            onChange={(e) => handleBuscar(e.target.value)}
+          />
+        </div>
+
+        <select
+          value={categoriaSeleccionada}
+          onChange={(e) => handleCategoria(e.target.value)}
+          className="events-category-select"
+        >
+          <option value="">Todas las categorías</option>
+
+          {categorias.map((categoria) => (
+            <option
+              key={categoria.categoria}
+              value={categoria.categoria}
+            >
+              {categoria.categoria} ({categoria.cantidadEventos})
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="events-results-bar">
         <span className="events-results-count">
-          {filtered.length} evento{filtered.length !== 1 ? "s" : ""} encontrado
-          {filtered.length !== 1 ? "s" : ""}
+          {eventos.length} evento{eventos.length !== 1 ? "s" : ""} encontrado
+          {eventos.length !== 1 ? "s" : ""}
         </span>
       </div>
 
-      {filtered.length > 0 ? (
+      {loading ? (
+        <div className="events-empty">
+          <p>Cargando eventos...</p>
+        </div>
+      ) : eventos.length > 0 ? (
         <div className="events-grid">
-          {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
+          {eventos.map((evento) => (
+            <EventCard
+              key={evento.idEvento}
+              event={evento}
+            />
           ))}
         </div>
       ) : (
         <div className="events-empty">
           <Ticket className="events-empty-icon" size={48} />
-          <p>No hay eventos disponibles en esta categoría por ahora.</p>
+          <p>No se encontraron eventos.</p>
         </div>
       )}
     </div>
