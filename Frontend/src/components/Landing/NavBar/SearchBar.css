@@ -434,3 +434,32 @@
     --rdp-cell-size: 32px;
   }
 }
+
+
+.dropdown-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--c4);
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 200; /* 👈 era 30, debe ser mayor que el navbar (100) */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.calendar-popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: var(--c4);
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px;
+  z-index: 200; /* 👈 era 40, debe ser mayor que el navbar (100) */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

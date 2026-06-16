@@ -6,6 +6,8 @@ import Events from "./pages/Events";
 import EventPay from "./pages/Pay";
 import MyEvents from "./pages/MyEvents";
 import Profile from "./pages/Profile";
+import Services from "./pages/Services";
+import Recintos from "./pages/Recintos";
 
 export const router = createBrowserRouter([
   { path: "/", Component: Home },
@@ -14,5 +16,7 @@ export const router = createBrowserRouter([
   { path: "/eventos", Component: Events },
   { path: "/eventos/:id", Component: EventPay },
   { path: "/mis-eventos", Component: MyEvents },
-  { path: "/profile", Component: Profile }
+  { path: "/profile", Component: Profile },
+  { path: "/servicios", Component: Services },
+  { path: "/recintos", Component: Recintos }
 ]);

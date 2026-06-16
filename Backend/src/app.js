@@ -9,6 +9,9 @@ import pagoRoutes from "./routes/pagoRoutes.js"
 import ciudadRouter from "./routes/CiudadRouter.js"
 import ticketUsuarioRoutes from "./routes/ticketUsuarioRoutes.js"
 import catalogoRoutes from "./routes/catalogoRoutes.js"
+import servicioRoutes from "./routes/servicioRoutes.js"
+import recintoRoutes from "./routes/recintoRoutes.js"
+import searchRoutes from "./routes/searchRoutes.js"
 
 const app = express();
 
@@ -28,6 +31,9 @@ app.use("/api/ciudad", ciudadRouter)
 app.use("/api/pagos", pagoRoutes)
 app.use("/api/mis-eventos", ticketUsuarioRoutes)
 app.use("/api/catalogo", catalogoRoutes)
+app.use("/api/servicios", servicioRoutes)
+app.use("/api/recintos", recintoRoutes)
+app.use("/api/search", searchRoutes)
 app.get("/", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"

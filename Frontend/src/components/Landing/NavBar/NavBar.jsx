@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { House, Music, Drama, Trophy, Star, MapPinned, Ticket, LogIn, UserPlus, LogOut, User } from 'lucide-react';
-import SearchBar from './SearchBar';
+import { House, Music, Drama, Briefcase, MapPinned, Ticket, LogIn, UserPlus, LogOut, User, Search, X } from 'lucide-react';
 import "./NavBar.css";
 import "../../../styles/styles.css";
 import { useAuth } from '../../../context/AuthContext';
+import { buscarEventos } from '../../../services/SearchService';
 
 export default function NavBar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchVisible, setSearchVisible] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [resultados, setResultados] = useState([]);
+  const [mostrarDropdown, setMostrarDropdown] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const debounceRef = useRef(null);
+  const searchRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const closeSidebar = () => setSidebarOpen(false);
@@ -21,8 +26,67 @@ export default function NavBar() {
     navigate('/');
   };
 
-  const toggleSearch = () => {
-    setSearchVisible(!searchVisible);
+  const limpiarSearch = () => {
+    setSearchQuery('');
+    setResultados([]);
+    setMostrarDropdown(false);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setMostrarDropdown(false);
+      navigate(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleResultadoClick = (idEvento) => {
+    limpiarSearch();
+    navigate(`/eventos/${idEvento}`);
+  };
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!searchQuery.trim()) {
+      setResultados([]);
+      setMostrarDropdown(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      setCargando(true);
+      try {
+        const data = await buscarEventos(searchQuery.trim());
+        setResultados(data);
+        setMostrarDropdown(true);
+      } catch {
+        setResultados([]);
+      } finally {
+        setCargando(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setMostrarDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const formatearFecha = (timestamp) => {
+    if (!timestamp) return '';
+    return new Date(timestamp).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   return (
@@ -30,30 +94,12 @@ export default function NavBar() {
       <div className="navbar-header">
         <img src="/LogoNodus.webp" alt="Logo" className="navbar-logo" />
         <ul className="navbar-links">
-          <li>
-            <Link to="/">
-              <House size={16} />
-              <span>Inicio</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/eventos">
-              <Music size={16} />
-              <span>Conciertos y Festivales</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/eventos">
-              <Drama size={16} />
-              <span>Teatro y Cultura</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/mis-eventos">
-              <Ticket size={16} />
-              <span>Mis Tickets</span>
-            </Link>
-          </li>
+          <li><Link to="/"><House size={16} /><span>Inicio</span></Link></li>
+          <li><Link to="/eventos"><Music size={16} /><span>Conciertos y Festivales</span></Link></li>
+          <li><Link to="/eventos"><Drama size={16} /><span>Teatro y Cultura</span></Link></li>
+          <li><Link to="/servicios"><Briefcase size={16} /><span>Servicios</span></Link></li>
+          <li><Link to="/Recintos"><MapPinned size={16} /><span>Recintos</span></Link></li>
+          <li><Link to="/mis-eventos"><Ticket size={16} /><span>Mis Tickets</span></Link></li>
         </ul>
         <div className="navbar-buttons">
           {usuario ? (
@@ -70,7 +116,7 @@ export default function NavBar() {
           ) : (
             <>
               <Link to="/login" className="navbar-btn-login">
-                <LogIn size={16}/>
+                <LogIn size={16} />
                 <span>Ingresar</span>
               </Link>
               <Link to="/signup" className="navbar-btn-register">
@@ -86,33 +132,78 @@ export default function NavBar() {
           <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
         </button>
       </div>
+
+      <div className="navbar-search-row">
+        <form className="navbar-search-form" onSubmit={handleSearch}>
+          <div className="navbar-search-input-wrapper" ref={searchRef}>
+            <Search size={16} className="navbar-search-icon" />
+            <input
+              type="text"
+              className="navbar-search-input"
+              placeholder="Buscar eventos, recintos, servicios..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => { if (resultados.length > 0) setMostrarDropdown(true); }}
+              autoComplete="off"
+            />
+            {searchQuery && (
+              <button type="button" className="navbar-search-clear" onClick={limpiarSearch}>
+                <X size={14} />
+              </button>
+            )}
+
+            {mostrarDropdown && (
+              <div className="navbar-search-dropdown">
+                {cargando ? (
+                  <div className="navbar-search-estado">Buscando...</div>
+                ) : resultados.length === 0 ? (
+                  <div className="navbar-search-estado">Sin resultados para "{searchQuery}"</div>
+                ) : (
+                  <>
+                    <div className="navbar-search-dropdown-header">
+                      {resultados.length} resultado{resultados.length !== 1 ? 's' : ''}
+                    </div>
+                    {resultados.map((evento) => (
+                      <div
+                        key={evento.idEvento}
+                        className="navbar-search-item"
+                        onClick={() => handleResultadoClick(evento.idEvento)}
+                      >
+                        <div className="navbar-search-item-img">
+                          {evento.imagenUrl ? (
+                            <img src={evento.imagenUrl} alt={evento.nombreEvento} />
+                          ) : (
+                            <div className="navbar-search-item-img-placeholder">
+                              <Music size={16} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="navbar-search-item-info">
+                          <span className="navbar-search-item-nombre">{evento.nombreEvento}</span>
+                          <span className="navbar-search-item-meta">
+                            {evento.nombreCiudad} · {evento.nombreRecinto} · {formatearFecha(evento.fecha)}
+                          </span>
+                        </div>
+                        <span className="navbar-search-item-categoria">{evento.categoria}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </form>
+      </div>
+
       {sidebarOpen && <div className="navbar-overlay" onClick={closeSidebar}></div>}
       <div className={`navbar-sidebar ${sidebarOpen ? 'active' : ''}`}>
         <ul className="navbar-sidebar-links">
-          <li>
-            <Link to="/" onClick={closeSidebar}>
-              <House size={16} />
-              <span>Inicio</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <Music size={16} />
-              <span>Conciertos y Festivales</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/eventos" onClick={closeSidebar}>
-              <Drama size={16} />
-              <span>Teatro y Cultura</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/mis-eventos" onClick={closeSidebar}>
-              <Ticket size={16} />
-              <span>Mis Tickets</span>
-            </Link>
-          </li>
+          <li><Link to="/" onClick={closeSidebar}><House size={16} /><span>Inicio</span></Link></li>
+          <li><Link to="/eventos" onClick={closeSidebar}><Music size={16} /><span>Conciertos y Festivales</span></Link></li>
+          <li><Link to="/eventos" onClick={closeSidebar}><Drama size={16} /><span>Teatro y Cultura</span></Link></li>
+          <li><Link to="/servicios" onClick={closeSidebar}><Briefcase size={16} /><span>Servicios</span></Link></li>
+          <li><Link to="/Recintos" onClick={closeSidebar}><MapPinned size={16} /><span>Recintos</span></Link></li>
+          <li><Link to="/mis-eventos" onClick={closeSidebar}><Ticket size={16} /><span>Mis Tickets</span></Link></li>
         </ul>
         <div className="navbar-sidebar-buttons">
           {usuario ? (
@@ -129,7 +220,7 @@ export default function NavBar() {
           ) : (
             <>
               <Link to="/login" className="navbar-sidebar-btn-login" onClick={closeSidebar}>
-                <LogIn size={16}/>
+                <LogIn size={16} />
                 <span>Ingresar</span>
               </Link>
               <Link to="/signup" className="navbar-sidebar-btn-register" onClick={closeSidebar}>
@@ -139,9 +230,6 @@ export default function NavBar() {
             </>
           )}
         </div>
-      </div>
-      <div className={`navbar-search-container ${searchVisible ? 'visible' : 'hidden'}`}>
-        <SearchBar onToggleSearch={toggleSearch} isVisible={searchVisible} />
       </div>
     </nav>
   );
