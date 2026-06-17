@@ -12,6 +12,8 @@ import catalogoRoutes from "./routes/catalogoRoutes.js"
 import servicioRoutes from "./routes/servicioRoutes.js"
 import recintoRoutes from "./routes/recintoRoutes.js"
 import searchRoutes from "./routes/searchRoutes.js"
+import contratarServicioRoutes from "./routes/contratarServicioRoutes.js"
+import contratarRecintoRoutes from "./routes/contratarRecintoRoutes.js"
 
 const app = express();
 
@@ -34,6 +36,9 @@ app.use("/api/catalogo", catalogoRoutes)
 app.use("/api/servicios", servicioRoutes)
 app.use("/api/recintos", recintoRoutes)
 app.use("/api/search", searchRoutes)
+app.use("/api/contratar-servicio", contratarServicioRoutes)
+
+app.use("/api/contratar-recinto", contratarRecintoRoutes)
 app.get("/", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"

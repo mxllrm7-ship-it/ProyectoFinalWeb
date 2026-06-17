@@ -1,35 +1,21 @@
-import {
-  MapPin,
-  Users,
-  Building2,
-  CheckCircle,
-  Wrench,
-  Ban,
-  ArrowRight,
-  MapPinned,
-} from "lucide-react";
+import { MapPin, Users, Building2, CheckCircle, Wrench, Ban, ArrowRight, MapPinned } from "lucide-react";
 import "./RecintoCard.css";
 
-export default function RecintoCard({ recinto }) {
+export default function RecintoCard({ recinto, onContratar }) {
   const getEstadoBadge = () => {
     const estado = recinto.estado || "Estado no definido";
-
     return {
       texto: estado,
       clase:
-        estado === "Disponible"
-          ? "disponible"
-          : estado === "En Mantenimiento"
-            ? "mantenimiento"
-            : estado === "Clausurado"
-              ? "clausurado"
-              : "no-definido",
+        estado === "Disponible" ? "disponible"
+        : estado === "En Mantenimiento" ? "mantenimiento"
+        : estado === "Clausurado" ? "clausurado"
+        : "no-definido",
     };
   };
 
   const getEstadoIcon = () => {
-    const estado = recinto.estado || "Estado no definido";
-
+    const estado = recinto.estado || "";
     if (estado === "Disponible") return <CheckCircle size={16} />;
     if (estado === "En Mantenimiento") return <Wrench size={16} />;
     if (estado === "Clausurado") return <Ban size={16} />;
@@ -44,9 +30,7 @@ export default function RecintoCard({ recinto }) {
 
   const handleVerUbicacion = (e) => {
     e.stopPropagation();
-    if (recinto.googleMaps) {
-      window.open(recinto.googleMaps, "_blank");
-    }
+    if (recinto.googleMaps) window.open(recinto.googleMaps, "_blank");
   };
 
   return (
@@ -58,39 +42,20 @@ export default function RecintoCard({ recinto }) {
           className="recinto-card-image"
           loading="lazy"
           onError={(e) => {
-            e.target.src =
-              "https://images.unsplash.com/photo-1505228395891-9a51e7e86e81?w=800&h=500&fit=crop";
+            e.target.src = "https://images.unsplash.com/photo-1505228395891-9a51e7e86e81?w=800&h=500&fit=crop";
           }}
         />
-
         <div className="recinto-card-overlay" />
-
-        <div className="recinto-card-badge">
-          {recinto.tipo}
-        </div>
+        <div className="recinto-card-badge">{recinto.tipo}</div>
       </div>
 
       <div className="recinto-card-content">
-        <h3 className="recinto-card-title">
-          {recinto.nombre}
-        </h3>
+        <h3 className="recinto-card-title">{recinto.nombre}</h3>
 
         <div className="recinto-card-details">
-          <div className="recinto-card-detail">
-            <MapPin size={16} />
-            <span>{recinto.ciudad}</span>
-          </div>
-
-          <div className="recinto-card-detail">
-            <Building2 size={16} />
-            <span>{recinto.direccion}</span>
-          </div>
-
-          <div className="recinto-card-detail">
-            <Users size={16} />
-            <span>{recinto.capacidad} personas</span>
-          </div>
-
+          <div className="recinto-card-detail"><MapPin size={16} /><span>{recinto.ciudad}</span></div>
+          <div className="recinto-card-detail"><Building2 size={16} /><span>{recinto.direccion}</span></div>
+          <div className="recinto-card-detail"><Users size={16} /><span>{recinto.capacidad} personas</span></div>
           <div className="recinto-card-detail">
             <div className={`recinto-card-estado ${badge.clase}`}>
               {getEstadoIcon()}
@@ -101,24 +66,19 @@ export default function RecintoCard({ recinto }) {
 
         <div className="recinto-card-footer">
           <div className="recinto-card-prices">
-            <span className="recinto-card-price-label">
-              Desde
-            </span>
-
-            <span className="recinto-card-price">
-              Bs {recinto.precioHora} / hora
-            </span>
+            <span className="recinto-card-price-label">Desde</span>
+            <span className="recinto-card-price">Bs {recinto.precioHora} / hora</span>
           </div>
 
           <div className="recinto-card-buttons">
             <button
               className="recinto-card-button recinto-card-button-primary"
-              onClick={(e) => e.stopPropagation()}
+              onClick={() => onContratar(recinto)}
+              disabled={recinto.estado !== "Disponible"}
             >
-              Ver detalles
+              Reservar
               <ArrowRight size={16} />
             </button>
-
             {recinto.googleMaps && (
               <button
                 className="recinto-card-button recinto-card-button-secondary"

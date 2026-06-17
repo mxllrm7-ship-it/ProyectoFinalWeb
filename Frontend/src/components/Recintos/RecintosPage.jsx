@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Search, Building2, Landmark, MapPinned } from "lucide-react";
 import RecintoCard from "./RecintoCard/RecintoCard.jsx";
+import ReservaModal from "./ReservaModal/ReservaModal.jsx";
 import { obtenerRecintos } from "../../Services/RecintoService";
 import "./RecintosPage.css";
 import "../../styles/styles.css";
@@ -13,6 +14,7 @@ export default function RecintosPage() {
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [loading, setLoading] = useState(true);
+  const [recintoSeleccionado, setRecintoSeleccionado] = useState(null);
 
   const cargarRecintos = async () => {
     try {
@@ -34,30 +36,20 @@ export default function RecintosPage() {
     setTipos(tiposUnicos);
   };
 
-  useEffect(() => {
-    cargarRecintos();
-  }, []);
+  useEffect(() => { cargarRecintos(); }, []);
 
   const filtrarRecintos = () => {
     let resultado = recintos;
-
     if (busqueda.trim()) {
       const busquedaLower = busqueda.toLowerCase();
       resultado = resultado.filter(
-        (recinto) =>
-          recinto.nombre.toLowerCase().includes(busquedaLower) ||
-          recinto.ciudad.toLowerCase().includes(busquedaLower)
+        (r) =>
+          r.nombre.toLowerCase().includes(busquedaLower) ||
+          r.ciudad.toLowerCase().includes(busquedaLower)
       );
     }
-
-    if (ciudadSeleccionada) {
-      resultado = resultado.filter((recinto) => recinto.ciudad === ciudadSeleccionada);
-    }
-
-    if (tipoSeleccionado) {
-      resultado = resultado.filter((recinto) => recinto.tipo === tipoSeleccionado);
-    }
-
+    if (ciudadSeleccionada) resultado = resultado.filter((r) => r.ciudad === ciudadSeleccionada);
+    if (tipoSeleccionado) resultado = resultado.filter((r) => r.tipo === tipoSeleccionado);
     return resultado;
   };
 
@@ -91,31 +83,13 @@ export default function RecintosPage() {
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
-
-          <select
-            value={ciudadSeleccionada}
-            onChange={(e) => setCiudadSeleccionada(e.target.value)}
-            className="recintos-select"
-          >
+          <select value={ciudadSeleccionada} onChange={(e) => setCiudadSeleccionada(e.target.value)} className="recintos-select">
             <option value="">Todas las ciudades</option>
-            {ciudades.map((ciudad) => (
-              <option key={ciudad} value={ciudad}>
-                {ciudad}
-              </option>
-            ))}
+            {ciudades.map((ciudad) => <option key={ciudad} value={ciudad}>{ciudad}</option>)}
           </select>
-
-          <select
-            value={tipoSeleccionado}
-            onChange={(e) => setTipoSeleccionado(e.target.value)}
-            className="recintos-select"
-          >
+          <select value={tipoSeleccionado} onChange={(e) => setTipoSeleccionado(e.target.value)} className="recintos-select">
             <option value="">Todos los tipos</option>
-            {tipos.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {tipo}
-              </option>
-            ))}
+            {tipos.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
           </select>
         </div>
       </div>
@@ -123,8 +97,7 @@ export default function RecintosPage() {
       <div className="recintos-content-wrapper">
         <div className="recintos-results-bar">
           <span className="recintos-results-count">
-            {recintosFiltrados.length} recinto{recintosFiltrados.length !== 1 ? "s" : ""} encontrado
-            {recintosFiltrados.length !== 1 ? "s" : ""}
+            {recintosFiltrados.length} recinto{recintosFiltrados.length !== 1 ? "s" : ""} encontrado{recintosFiltrados.length !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -136,7 +109,11 @@ export default function RecintosPage() {
         ) : recintosFiltrados.length > 0 ? (
           <div className="recintos-grid">
             {recintosFiltrados.map((recinto) => (
-              <RecintoCard key={recinto.id} recinto={recinto} />
+              <RecintoCard
+                key={recinto.id}
+                recinto={recinto}
+                onContratar={(r) => setRecintoSeleccionado(r)}
+              />
             ))}
           </div>
         ) : (
@@ -146,6 +123,13 @@ export default function RecintosPage() {
           </div>
         )}
       </div>
+
+      {recintoSeleccionado && (
+        <ReservaModal
+          recinto={recintoSeleccionado}
+          onClose={() => setRecintoSeleccionado(null)}
+        />
+      )}
     </div>
   );
 }
