@@ -6,6 +6,32 @@ import { useAuth } from "../../../context/AuthContext";
 import "./Eventdetail.css";
 import "./ModalPago.css";
 
+function QRSection() {
+  const [qrListo, setQrListo] = useState(false);
+
+  useEffect(() => {
+    setQrListo(false);
+    const timer = setTimeout(() => setQrListo(true), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="mp-qr-seccion">
+      {!qrListo ? (
+        <div className="mp-qr-cargando">
+          <div className="mp-qr-spinner-ring"></div>
+          <span className="mp-qr-texto-carga">Generando QR...</span>
+        </div>
+      ) : (
+        <div className="mp-qr-wrapper">
+          <img src="/qr.png" alt="QR de pago" className="mp-qr-imagen" />
+          <p className="mp-qr-instruccion">Escanea el QR para realizar el pago</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function EventPay() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,7 +42,7 @@ export default function EventPay() {
   const [carrito, setCarrito] = useState({});
   const [imagenPrincipal, setImagenPrincipal] = useState(null);
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [metodoPago, setMetodoPago] = useState(1);
+  const [metodoPago, setMetodoPago] = useState(2);
   const [compradorNombre, setCompradorNombre] = useState("");
   const [compradorCorreo, setCompradorCorreo] = useState("");
   const [compradorCelular, setCompradorCelular] = useState("");
@@ -25,7 +51,6 @@ export default function EventPay() {
   const [errorPago, setErrorPago] = useState("");
 
   const METODOS_PAGO = [
-    { id: 1, nombre: "Tarjeta", icono: "ti-credit-card", comision: 10 },
     { id: 2, nombre: "QR", icono: "ti-qrcode", comision: 0 },
     { id: 3, nombre: "Efectivo", icono: "ti-cash", comision: 0 },
   ];
@@ -202,6 +227,8 @@ export default function EventPay() {
                 ))}
               </div>
             </div>
+
+            {metodoPago === 2 && <QRSection />}
 
             <div className="mp-seccion">
               <h3>Datos del comprador</h3>
