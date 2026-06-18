@@ -22,3 +22,7 @@
     padding: 0;
     box-sizing: border-box;
 }
+
+.page_cont{
+  background: linear-gradient(135deg, var(--c5) 0%, var(--c2) 100%);
+}

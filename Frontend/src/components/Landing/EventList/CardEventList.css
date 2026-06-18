@@ -1,5 +1,5 @@
 .card-evento {
-  background-color: #FDFDFF;
+ background: linear-gradient(135deg, var(--c5) 0%, var(--c2) 100%);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(46, 49, 66, 0.15);

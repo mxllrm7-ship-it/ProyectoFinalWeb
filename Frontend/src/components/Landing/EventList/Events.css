@@ -1,7 +1,7 @@
 .events-main {
   width: 100%;
   min-height: 100vh;
-  background-color: #FFFFFF;
+  background: linear-gradient(135deg, var(--c5) 0%, var(--c2) 100%);
   padding: 20px 0;
 }
 

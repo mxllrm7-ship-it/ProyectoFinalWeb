@@ -1,4 +1,5 @@
-import { createBrowserRouter } from "react-router";
+// src/router.jsx
+import { createBrowserRouter, redirect } from "react-router";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -9,14 +10,33 @@ import Profile from "./pages/Profile";
 import Services from "./pages/Services";
 import Recintos from "./pages/Recintos";
 
+const authLoader = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return redirect("/");
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expirado = payload.exp * 1000 < Date.now();
+    if (expirado) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      return redirect("/");
+    }
+  } catch {
+    return redirect("/");
+  }
+
+  return null;
+};
+
 export const router = createBrowserRouter([
   { path: "/", Component: Home },
   { path: "/login", Component: Login },
   { path: "/signup", Component: Signup },
   { path: "/eventos", Component: Events },
   { path: "/eventos/:id", Component: EventPay },
-  { path: "/mis-eventos", Component: MyEvents },
-  { path: "/profile", Component: Profile },
   { path: "/servicios", Component: Services },
-  { path: "/recintos", Component: Recintos }
+  { path: "/recintos", Component: Recintos },
+  { path: "/mis-eventos", Component: MyEvents, loader: authLoader },
+  { path: "/profile", Component: Profile, loader: authLoader },
 ]);

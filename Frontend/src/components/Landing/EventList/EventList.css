@@ -1,14 +1,14 @@
 .event-list-section {
   width: 100%;
   padding: 40px 20px;
-  background-color: #FFFFFF;
+  background: linear-gradient(135deg, var(--c5) 0%, var(--c2) 100%);
 }
 
 .event-list-titulo {
   font-family: "Montserrat", sans-serif;
   font-size: 28px;
   font-weight: 700;
-  color: #2E3142;
+  color: #D3A373;
   margin-bottom: 24px;
   text-align: left;
   padding-left: 0;
@@ -28,6 +28,7 @@
   padding: 8px 0;
   scrollbar-width: thin;
   scrollbar-color: #D3A373 #FDFDFF;
+  background: linear-gradient(135deg, var(--c5) 0%, var(--c2) 100%);
 }
 
 .carrusel-container::-webkit-scrollbar {

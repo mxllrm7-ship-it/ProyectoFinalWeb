@@ -5,10 +5,10 @@ import Footer from "../components/Landing/Footer/Footer";
 
 export default function Events() {
   return (
-    <>
+    <div className="page_cont">
       <NavBar />
       <EventsPage />
       <Footer />
-    </>
+    </div>
   );
 }

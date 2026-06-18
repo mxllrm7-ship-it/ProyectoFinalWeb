@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { House, Music, Drama, Briefcase, MapPinned, Ticket, LogIn, UserPlus, LogOut, User, Search, X } from 'lucide-react';
+import { House, Music, Drama, Briefcase, MapPinned, Ticket, LogIn, UserPlus, LogOut, User, Search, X,ShoppingCart } from 'lucide-react';
 import "./NavBar.css";
 import "../../../styles/styles.css";
 import { useAuth } from '../../../context/AuthContext';
@@ -99,7 +99,9 @@ export default function NavBar() {
           <li><Link to="/eventos"><Drama size={16} /><span>Teatro y Cultura</span></Link></li>
           <li><Link to="/servicios"><Briefcase size={16} /><span>Servicios</span></Link></li>
           <li><Link to="/Recintos"><MapPinned size={16} /><span>Recintos</span></Link></li>
-          <li><Link to="/mis-eventos"><Ticket size={16} /><span>Mis Tickets</span></Link></li>
+          {usuario && (
+            <li><Link to="/mis-eventos"><ShoppingCart size={16} /><span>Mis Compras</span></Link></li>
+          )}
         </ul>
         <div className="navbar-buttons">
           {usuario ? (
@@ -203,7 +205,9 @@ export default function NavBar() {
           <li><Link to="/eventos" onClick={closeSidebar}><Drama size={16} /><span>Teatro y Cultura</span></Link></li>
           <li><Link to="/servicios" onClick={closeSidebar}><Briefcase size={16} /><span>Servicios</span></Link></li>
           <li><Link to="/Recintos" onClick={closeSidebar}><MapPinned size={16} /><span>Recintos</span></Link></li>
-          <li><Link to="/mis-eventos" onClick={closeSidebar}><Ticket size={16} /><span>Mis Tickets</span></Link></li>
+          {usuario && (
+            <li><Link to="/mis-eventos" onClick={closeSidebar}><Ticket size={16} /><span>Mis Tickets</span></Link></li>
+          )}
         </ul>
         <div className="navbar-sidebar-buttons">
           {usuario ? (
