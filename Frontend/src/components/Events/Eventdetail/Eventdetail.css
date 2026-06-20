@@ -1,6 +1,6 @@
 .ep-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, var(--c5) 0%, var(--c2) 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -51,8 +51,13 @@
 }
 
 @keyframes ep-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .ep-hero {
@@ -71,7 +76,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
 }
 
 .ep-hero-content {
@@ -123,7 +128,7 @@
   padding: 30px;
   margin-bottom: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .ep-section h2 {
@@ -449,7 +454,7 @@
   background: #fff;
   border-radius: 8px;
   padding: 25px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .ep-carrito-resumen h3 {
@@ -544,7 +549,7 @@
   width: 100%;
   padding: 14px;
   margin-top: 20px;
-  background: #3498db;
+  background: #D3A373;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -557,7 +562,7 @@
 }
 
 .ep-btn-comprar:hover:not(:disabled) {
-  background: #2980b9;
+  background: #b7936f;
 }
 
 .ep-btn-comprar:disabled {

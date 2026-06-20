@@ -14,6 +14,7 @@ import recintoRoutes from "./routes/recintoRoutes.js"
 import searchRoutes from "./routes/searchRoutes.js"
 import contratarServicioRoutes from "./routes/contratarServicioRoutes.js"
 import contratarRecintoRoutes from "./routes/contratarRecintoRoutes.js"
+import misEventosRoutes from "./routes/misEventosRoutes.js"
 
 const app = express();
 
@@ -37,7 +38,7 @@ app.use("/api/servicios", servicioRoutes)
 app.use("/api/recintos", recintoRoutes)
 app.use("/api/search", searchRoutes)
 app.use("/api/contratar-servicio", contratarServicioRoutes)
-
+app.use("/api/mis-eventos", misEventosRoutes)
 app.use("/api/contratar-recinto", contratarRecintoRoutes)
 app.get("/", (req, res) => {
   res.json({
