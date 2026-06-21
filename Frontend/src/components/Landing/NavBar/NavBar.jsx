@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { House, Music, Drama, Briefcase, MapPinned, Ticket, LogIn, UserPlus, LogOut, User, Search, X,ShoppingCart } from 'lucide-react';
+import { House, Music, Drama, Briefcase, MapPinned, Ticket, LogIn, UserPlus, LogOut, User, Search, X, ShoppingCart, Menu } from 'lucide-react';
 import "./NavBar.css";
 import "../../../styles/styles.css";
 import { useAuth } from '../../../context/AuthContext';
@@ -123,15 +123,13 @@ export default function NavBar() {
               </Link>
               <Link to="/signup" className="navbar-btn-register">
                 <UserPlus size={16} />
-                <span>Registrarse</span>
+                <span>Registrate</span>
               </Link>
             </>
           )}
         </div>
         <button className="hamburger" onClick={toggleSidebar} aria-label="Abrir menú">
-          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
-          <span className={`hamburger-line ${sidebarOpen ? 'open' : ''}`}></span>
+          <Menu size={24} />
         </button>
       </div>
 
@@ -199,6 +197,9 @@ export default function NavBar() {
 
       {sidebarOpen && <div className="navbar-overlay" onClick={closeSidebar}></div>}
       <div className={`navbar-sidebar ${sidebarOpen ? 'active' : ''}`}>
+        <button className="navbar-sidebar-close" onClick={closeSidebar} aria-label="Cerrar menú">
+          <X size={20} />
+        </button>
         <ul className="navbar-sidebar-links">
           <li><Link to="/" onClick={closeSidebar}><House size={16} /><span>Inicio</span></Link></li>
           <li><Link to="/eventos" onClick={closeSidebar}><Music size={16} /><span>Conciertos y Festivales</span></Link></li>
@@ -229,7 +230,7 @@ export default function NavBar() {
               </Link>
               <Link to="/signup" className="navbar-sidebar-btn-register" onClick={closeSidebar}>
                 <UserPlus size={16} />
-                <span>Registrarse</span>
+                <span>Registrate</span>
               </Link>
             </>
           )}

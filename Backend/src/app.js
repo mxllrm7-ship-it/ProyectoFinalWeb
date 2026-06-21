@@ -15,6 +15,9 @@ import searchRoutes from "./routes/searchRoutes.js"
 import contratarServicioRoutes from "./routes/contratarServicioRoutes.js"
 import contratarRecintoRoutes from "./routes/contratarRecintoRoutes.js"
 import misEventosRoutes from "./routes/misEventosRoutes.js"
+import authAdminRoutes from "./routes/authAdminRoutes.js"
+import eventoRouter from "./routes/eventorouterAdmin.js"
+
 
 const app = express();
 
@@ -40,6 +43,8 @@ app.use("/api/search", searchRoutes)
 app.use("/api/contratar-servicio", contratarServicioRoutes)
 app.use("/api/mis-eventos", misEventosRoutes)
 app.use("/api/contratar-recinto", contratarRecintoRoutes)
+app.use("/api/admin/auth", authAdminRoutes)
+app.use("/api/admin", eventoRouter)
 app.get("/", (req, res) => {
   res.json({
     mensaje: "Servidor funcionando correctamente"

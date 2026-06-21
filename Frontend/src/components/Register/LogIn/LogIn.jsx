@@ -3,6 +3,7 @@ import './LogIn.css';
 import '../../../styles/styles.css';
 import { Link, useNavigate } from 'react-router';
 import { loginUsuario } from '../../../services/usuarioService';
+import { loginAdmin } from '../../../services/adminService';
 import { useAuth } from '../../../context/AuthContext';
 
 export default function LogInUser() {
@@ -10,6 +11,7 @@ export default function LogInUser() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [modo, setModo] = useState('usuario');
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -18,9 +20,15 @@ export default function LogInUser() {
     setError('');
     setLoading(true);
     try {
-      const { usuario, token } = await loginUsuario({ username, password });
-      login(usuario, token);
-      navigate('/');
+      if (modo === 'admin') {
+        const { usuario, token } = await loginAdmin(username, password);
+        login(usuario, token);
+        navigate('/admin');
+      } else {
+        const { usuario, token } = await loginUsuario({ username, password });
+        login(usuario, token);
+        navigate('/');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -32,6 +40,24 @@ export default function LogInUser() {
     <div className="login-container">
       <div className="login-card">
         <h1 className="login-title">Iniciar Sesión</h1>
+
+        <div className="login-modo-toggle">
+          <button
+            type="button"
+            className={`login-modo-btn ${modo === 'usuario' ? 'active' : ''}`}
+            onClick={() => { setModo('usuario'); setError(''); }}
+          >
+            Usuario
+          </button>
+          <button
+            type="button"
+            className={`login-modo-btn ${modo === 'admin' ? 'active' : ''}`}
+            onClick={() => { setModo('admin'); setError(''); }}
+          >
+            Administrador
+          </button>
+        </div>
+
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="login-form-group">
             <label htmlFor="username" className="login-label">Usuario</label>
@@ -62,9 +88,12 @@ export default function LogInUser() {
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
-        <div className="login-footer">
-          <p className="login-text">¿No tienes cuenta? <Link to="/signup" className="login-link">Registrarse</Link></p>
-        </div>
+
+        {modo === 'usuario' && (
+          <div className="login-footer">
+            <p className="login-text">¿No tienes cuenta? <Link to="/signup" className="login-link">Registrarse</Link></p>
+          </div>
+        )}
       </div>
     </div>
   );

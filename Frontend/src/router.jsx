@@ -9,6 +9,7 @@ import MyEvents from "./pages/MyEvents";
 import Profile from "./pages/Profile";
 import Services from "./pages/Services";
 import Recintos from "./pages/Recintos";
+import AdminPage from "./pages/Admin";
 
 const authLoader = () => {
   const token = localStorage.getItem("token");
@@ -39,4 +40,5 @@ export const router = createBrowserRouter([
   { path: "/recintos", Component: Recintos },
   { path: "/mis-eventos", Component: MyEvents, loader: authLoader },
   { path: "/profile", Component: Profile, loader: authLoader },
+  { path: "/admin", Component: AdminPage, loader: authLoader },
 ]);

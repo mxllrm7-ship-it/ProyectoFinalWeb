@@ -138,3 +138,35 @@
     font-size: 14px;
   }
 }
+
+
+.login-modo-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid var(--c3);
+}
+
+.login-modo-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: var(--c3);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.login-modo-btn.active {
+  background-color: var(--c3);
+  color: var(--c5);
+}
+
+.login-modo-btn:hover:not(.active) {
+  background-color: rgba(211, 163, 115, 0.1);
+}
